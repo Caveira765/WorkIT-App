@@ -1,4 +1,8 @@
-# WorkIT — Painel do Desenvolvedor & Buscador de Vagas TI
+<p align="center">
+  <img src="Assets/logo.png" width="130" alt="WorkIT Logo" style="border-radius: 20px;" />
+</p>
+
+# WorkIT — Painel do Desenvolvedor &amp; Buscador de Vagas TI
 
 Aplicação desktop completa desenvolvida em **C# (.NET / WPF)** com banco local **SQLite**, consumo assíncrono da **API pública da Gupy**, classificação automática de níveis de senioridade, sistema de favoritos e exportação para Excel (CSV).
 
