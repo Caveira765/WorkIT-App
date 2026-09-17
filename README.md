@@ -83,26 +83,3 @@ WorkIT.App/
    * Exporta a lista de vagas filtradas em formato CSV com codificação correta para o Excel.
 
 ---
-
-## 🎓 Guia de Apresentação e Defesa para o Grupo (6 Integrantes)
-
-Para que todos os integrantes tenham uma parte clara e técnica para defender perante o professor:
-
-* **Integrante 1 (Arquitetura e DTOs):**
-  * Explica a divisão do projeto em camadas (`Models`, `Services`, `Data`, `UI`).
-  * Mostra as classes `Vaga.cs` e `GupyApiResponse.cs`, explicando como o C# mapeia o JSON externo para objetos fortemente tipados.
-
-* **Integrante 2 (Integração com API REST - `GupyApiService.cs`):**
-  * Explica o uso de `HttpClient`, parâmetros de URL (`jobName`, `limit`, `offset`), chamadas assíncronas (`async/await`) e tratamento de erros de rede.
-
-* **Integrante 3 (Lógica de Negócio e Classificação - `VagaClassifierService.cs`):**
-  * Demonstra como o sistema classifica a senioridade (Estágio, Júnior, Pleno, Sênior) e normaliza acentos com `UnicodeCategory` para permitir buscas por cidades sem sensibilidade a diacríticos.
-
-* **Integrante 4 (Banco de Dados SQLite - `DatabaseService.cs`):**
-  * Apresenta o arquivo `vagas.db`, a tabela `vagas`, o comando `INSERT OR IGNORE` para evitar duplicatas e como o sistema sabe se a vaga é `[NOVA]` ou `[JÁ VISTA]`.
-
-* **Integrante 5 (Interface Visual WPF - `MainWindow.xaml`):**
-  * Mostra a construção da tela em XAML, o layout responsivo em abas (Oportunidades, Favoritas, Estatísticas), os cards com bindings visuais e o tema escuro.
-
-* **Integrante 6 (Ações do Usuário, Exportação CSV e Demonstração Prática):**
-  * Executa a aplicação ao vivo, faz uma busca por vagas, abre o link no navegador via `ProcessStartInfo`, favorita uma vaga e demonstra a exportação para o Excel.
