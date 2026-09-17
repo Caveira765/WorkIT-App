@@ -8,13 +8,16 @@ Projeto desenvolvido para a disciplina de **Desenvolvimento de Software Visual**
 
 ## 🚀 Como Rodar o Projeto
 
-### Opção 1: Via Terminal (.NET SDK)
+### Opção 1: 1 Clique com o Arquivo "Executar.bat"
+Basta dar duplo clique no arquivo `Executar.bat` na raiz do projeto. Ele detecta automaticamente o executável Release compilado ou roda via .NET.
+
+### Opção 2: Via Terminal (.NET SDK)
 Abra o terminal na pasta `WorkIT.App` e execute:
 ```bash
 dotnet run
 ```
 
-### Opção 2: Executável Direto
+### Opção 3: Executável Direto
 Você também pode rodar o arquivo compilado diretamente sem precisar do terminal:
 `WorkIT.App\bin\Release\net10.0-windows\WorkIT.App.exe`
 
