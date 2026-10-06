@@ -3,6 +3,18 @@ using System.Text.Json.Serialization;
 
 namespace WorkIT.App.Models;
 
+public class GupyNextDataResponse
+{
+    [JsonPropertyName("pageProps")]
+    public GupyPageProps? PageProps { get; set; }
+}
+
+public class GupyPageProps
+{
+    [JsonPropertyName("initialJobList")]
+    public GupyApiResponse? InitialJobList { get; set; }
+}
+
 public class GupyApiResponse
 {
     [JsonPropertyName("data")]

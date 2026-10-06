@@ -140,7 +140,7 @@ public partial class MainWindow : Window
                         filtroEstado,
                         filtroCidade,
                         limitePorPagina: 50,
-                        maximoPaginas: 1
+                        maximoPaginas: 2
                     );
 
                     foreach (var v in resultados)
@@ -176,8 +176,16 @@ public partial class MainWindow : Window
             TxtTotalNovas.Text = novas.ToString();
             TxtTotalJaVistas.Text = jaVistas.ToString();
 
-            TxtStatusLista.Text = $"Foram encontradas {_vagasAtuais.Count} oportunidades ({novas} novas identificadas e adicionadas ao banco local).";
-            TxtStatusRodape.Text = $"Busca concluída: {_vagasAtuais.Count} vagas encontradas ({novas} novas, {jaVistas} já catalogadas).";
+            if (_vagasAtuais.Count == 0)
+            {
+                TxtStatusLista.Text = "Nenhuma oportunidade encontrada para os filtros selecionados. Tente alterar a área ou palavra-chave.";
+                TxtStatusRodape.Text = "Busca concluída: 0 vagas encontradas.";
+            }
+            else
+            {
+                TxtStatusLista.Text = $"Foram encontradas {_vagasAtuais.Count} oportunidades ({novas} novas identificadas e adicionadas ao banco local).";
+                TxtStatusRodape.Text = $"Busca concluída: {_vagasAtuais.Count} vagas encontradas ({novas} novas, {jaVistas} já catalogadas).";
+            }
 
             AtualizarEstatisticasEBanco();
             CarregarVagasFavoritas();
