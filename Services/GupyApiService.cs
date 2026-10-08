@@ -61,8 +61,8 @@ public class GupyApiService
         string palavraChave,
         string? estadoFiltro = null,
         string? cidadeFiltro = null,
-        int limitePorPagina = 50,
-        int maximoPaginas = 3,
+        int paginaInicial = 1,
+        int quantidadePaginas = 2,
         CancellationToken cancellationToken = default)
     {
         var vagas = new List<Vaga>();
@@ -73,7 +73,9 @@ public class GupyApiService
         string termoTratado = palavraChave?.Trim() ?? string.Empty;
         string encodedTerm = Uri.EscapeDataString(termoTratado);
 
-        for (int pagina = 1; pagina <= maximoPaginas; pagina++)
+        int paginaFinal = paginaInicial + Math.Max(1, quantidadePaginas) - 1;
+
+        for (int pagina = paginaInicial; pagina <= paginaFinal; pagina++)
         {
             // O endpoint direto de pesquisa no portal Gupy é job-search/term={termo}.json
             string url = string.IsNullOrWhiteSpace(encodedTerm)

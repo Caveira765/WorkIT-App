@@ -475,11 +475,12 @@
 
                 <Grid Grid.Row="0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2.3*"/> <!-- Área -->
-                        <ColumnDefinition Width="1.5*"/> <!-- Estado -->
-                        <ColumnDefinition Width="1.8*"/> <!-- Cidade -->
-                        <ColumnDefinition Width="2.0*"/> <!-- Palavra-chave extra -->
+                        <ColumnDefinition Width="2.2*"/> <!-- Área -->
+                        <ColumnDefinition Width="1.4*"/> <!-- Estado -->
+                        <ColumnDefinition Width="1.7*"/> <!-- Cidade -->
+                        <ColumnDefinition Width="1.9*"/> <!-- Palavra-chave extra -->
                         <ColumnDefinition Width="Auto"/> <!-- Botão Buscar -->
+                        <ColumnDefinition Width="Auto"/> <!-- Botão Mais Vagas (Topo) -->
                         <ColumnDefinition Width="Auto"/> <!-- Botão CSV -->
                     </Grid.ColumnDefinitions>
 
@@ -508,15 +509,23 @@
                     </StackPanel>
 
                     <!-- Botão Buscar -->
-                    <Button x:Name="BtnBuscar" Grid.Column="4" Style="{StaticResource PrimaryButton}" Margin="0,20,10,0" Click="BtnBuscar_Click">
+                    <Button x:Name="BtnBuscar" Grid.Column="4" Style="{StaticResource PrimaryButton}" Margin="0,20,8,0" Click="BtnBuscar_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="🔍 " FontSize="12"/>
                             <TextBlock Text="Buscar Vagas"/>
                         </StackPanel>
                     </Button>
 
+                    <!-- Botão Mais Vagas (Topo) -->
+                    <Button x:Name="BtnCarregarMaisTopo" Grid.Column="5" Style="{StaticResource SecondaryButton}" Margin="0,20,8,0" Click="BtnCarregarMais_Click" ToolTip="Carregar mais páginas de vagas para a pesquisa atual" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="➕ " FontSize="12"/>
+                            <TextBlock Text="Mais Vagas"/>
+                        </StackPanel>
+                    </Button>
+
                     <!-- Botão Exportar CSV -->
-                    <Button x:Name="BtnExportar" Grid.Column="5" Style="{StaticResource SecondaryButton}" Margin="0,20,0,0" Click="BtnExportar_Click">
+                    <Button x:Name="BtnExportar" Grid.Column="6" Style="{StaticResource SecondaryButton}" Margin="0,20,0,0" Click="BtnExportar_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="📥 " FontSize="12"/>
                             <TextBlock Text="Exportar CSV"/>
@@ -571,79 +580,91 @@
 
                     <!-- Lista de Cards de Vagas (Com ScrollBar Minimalista Dark) -->
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="ItemsVagas">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type models:Vaga}">
-                                    <Border Background="#161828" BorderBrush="#25293d" BorderThickness="1" CornerRadius="10" Margin="0,0,10,12" Padding="18,16">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <ItemsControl x:Name="ItemsVagas">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:Vaga}">
+                                        <Border Background="#161828" BorderBrush="#25293d" BorderThickness="1" CornerRadius="10" Margin="0,0,10,12" Padding="18,16">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
 
-                                            <!-- Informações da Vaga -->
-                                            <StackPanel Grid.Column="0">
-                                                <!-- Badges de Status e Nível -->
-                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                                    <!-- Badge Nova vs Já Vista -->
-                                                    <Border Background="{Binding BadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
-                                                        <TextBlock Text="{Binding StatusBadge}" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                                    </Border>
-                                                    <!-- Badge Nível -->
-                                                    <Border Background="{Binding NivelBadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
-                                                        <TextBlock Text="{Binding Nivel}" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                                    </Border>
-                                                    <!-- ID da vaga -->
-                                                    <TextBlock Text="{Binding Id, StringFormat='#{0}'}" FontSize="11" Foreground="#64748b" VerticalAlignment="Center"/>
+                                                <!-- Informações da Vaga -->
+                                                <StackPanel Grid.Column="0">
+                                                    <!-- Badges de Status e Nível -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                                        <!-- Badge Nova vs Já Vista -->
+                                                        <Border Background="{Binding BadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
+                                                            <TextBlock Text="{Binding StatusBadge}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                        </Border>
+                                                        <!-- Badge Nível -->
+                                                        <Border Background="{Binding NivelBadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
+                                                            <TextBlock Text="{Binding Nivel}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                        </Border>
+                                                        <!-- ID da vaga -->
+                                                        <TextBlock Text="{Binding Id, StringFormat='#{0}'}" FontSize="11" Foreground="#64748b" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                    <!-- Título da Vaga -->
+                                                    <TextBlock Text="{Binding Titulo}" FontSize="16" FontWeight="Bold" Foreground="#f8fafc" TextWrapping="Wrap" Margin="0,0,0,6"/>
+
+                                                    <!-- Empresa e Local -->
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                        <TextBlock Text="🏢 " FontSize="12"/>
+                                                        <TextBlock Text="{Binding Empresa}" FontSize="13" FontWeight="SemiBold" Foreground="#93c5fd" Margin="0,0,16,0"/>
+                                                        <TextBlock Text="📍 " FontSize="12"/>
+                                                        <TextBlock Text="{Binding LocalFormatado}" FontSize="13" Foreground="#cbd5e1"/>
+                                                    </StackPanel>
+
+                                                    <!-- Data Publicação -->
+                                                    <TextBlock Text="{Binding DataPublicacao, StringFormat='Publicado em: {0}'}" FontSize="11" Foreground="#64748b"/>
                                                 </StackPanel>
 
-                                                <!-- Título da Vaga -->
-                                                <TextBlock Text="{Binding Titulo}" FontSize="16" FontWeight="Bold" Foreground="#f8fafc" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                                <!-- Ações no Card -->
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                                                    <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnAbrirLink_Click" Margin="0,0,0,8" MinWidth="155">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="🌐 " FontSize="12"/>
+                                                            <TextBlock Text="Abrir no Navegador"/>
+                                                        </StackPanel>
+                                                    </Button>
 
-                                                <!-- Empresa e Local -->
-                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                    <TextBlock Text="🏢 " FontSize="12"/>
-                                                    <TextBlock Text="{Binding Empresa}" FontSize="13" FontWeight="SemiBold" Foreground="#93c5fd" Margin="0,0,16,0"/>
-                                                    <TextBlock Text="📍 " FontSize="12"/>
-                                                    <TextBlock Text="{Binding LocalFormatado}" FontSize="13" Foreground="#cbd5e1"/>
+                                                    <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnFavoritar_Click" MinWidth="155">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock>
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text" Value="⭐ Salvar Vaga"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Favorita}" Value="True">
+                                                                                <Setter Property="Text" Value="★ Vaga Salva"/>
+                                                                                <Setter Property="Foreground" Value="#fbbf24"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </StackPanel>
+                                                    </Button>
                                                 </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
-                                                <!-- Data Publicação -->
-                                                <TextBlock Text="{Binding DataPublicacao, StringFormat='Publicado em: {0}'}" FontSize="11" Foreground="#64748b"/>
-                                            </StackPanel>
-
-                                            <!-- Ações no Card -->
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
-                                                <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnAbrirLink_Click" Margin="0,0,0,8" MinWidth="155">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="🌐 " FontSize="12"/>
-                                                        <TextBlock Text="Abrir no Navegador"/>
-                                                    </StackPanel>
-                                                </Button>
-
-                                                <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnFavoritar_Click" MinWidth="155">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock>
-                                                            <TextBlock.Style>
-                                                                <Style TargetType="TextBlock">
-                                                                    <Setter Property="Text" Value="⭐ Salvar Vaga"/>
-                                                                    <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding Favorita}" Value="True">
-                                                                            <Setter Property="Text" Value="★ Vaga Salva"/>
-                                                                            <Setter Property="Foreground" Value="#fbbf24"/>
-                                                                        </DataTrigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBlock.Style>
-                                                        </TextBlock>
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                            <!-- Botão Carregar Mais Vagas (Final da Lista) -->
+                            <Border x:Name="PanelCarregarMais" Visibility="Collapsed" Margin="0,10,10,26" HorizontalAlignment="Center">
+                                <Button x:Name="BtnCarregarMaisFim" Style="{StaticResource PrimaryButton}" Height="42" Padding="28,0" Click="BtnCarregarMais_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="📥 " FontSize="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Carregar Mais Vagas (+ Próximas Páginas)" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                        </StackPanel>
                     </ScrollViewer>
                 </Grid>
             </TabItem>

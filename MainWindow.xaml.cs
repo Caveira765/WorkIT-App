@@ -18,6 +18,11 @@ public partial class MainWindow : Window
     private readonly GupyApiService _apiService;
     private readonly DatabaseService _databaseService;
     private List<Vaga> _vagasAtuais = new();
+    private int _paginaAtual = 1;
+    private List<string> _ultimosTermosBusca = new();
+    private string? _ultimoFiltroEstado;
+    private string? _ultimoFiltroCidade;
+    private string _ultimaAreaNome = "Geral";
 
     public MainWindow()
     {
@@ -85,6 +90,9 @@ public partial class MainWindow : Window
     {
         BtnBuscar.IsEnabled = false;
         BtnExportar.IsEnabled = false;
+        BtnCarregarMaisTopo.IsEnabled = false;
+        BtnCarregarMaisFim.IsEnabled = false;
+        PanelCarregarMais.Visibility = Visibility.Collapsed;
         ProgressBusca.Visibility = Visibility.Visible;
         TxtStatusRodape.Text = "Consultando oportunidades na API pública da Gupy...";
 
@@ -127,6 +135,13 @@ public partial class MainWindow : Window
             termosDeBusca.Add("desenvolvedor");
         }
 
+        // Armazena contexto para buscas subsequentes com o botão "Mais Vagas"
+        _ultimosTermosBusca = termosDeBusca;
+        _ultimoFiltroEstado = filtroEstado;
+        _ultimoFiltroCidade = filtroCidade;
+        _ultimaAreaNome = areaSelecionada?.Nome ?? "Geral";
+        _paginaAtual = 2;
+
         try
         {
             var vagasMapeadas = new Dictionary<long, Vaga>();
@@ -139,15 +154,15 @@ public partial class MainWindow : Window
                         termo,
                         filtroEstado,
                         filtroCidade,
-                        limitePorPagina: 50,
-                        maximoPaginas: 3
+                        paginaInicial: 1,
+                        quantidadePaginas: 2
                     );
 
                     foreach (var v in resultados)
                     {
                         if (!vagasMapeadas.ContainsKey(v.Id))
                         {
-                            v.Area = areaSelecionada?.Nome ?? "Geral";
+                            v.Area = _ultimaAreaNome;
                             vagasMapeadas[v.Id] = v;
                         }
                     }
@@ -180,11 +195,15 @@ public partial class MainWindow : Window
             {
                 TxtStatusLista.Text = "Nenhuma oportunidade encontrada para os filtros selecionados. Tente alterar a área ou palavra-chave.";
                 TxtStatusRodape.Text = "Busca concluída: 0 vagas encontradas.";
+                BtnCarregarMaisTopo.IsEnabled = false;
+                PanelCarregarMais.Visibility = Visibility.Collapsed;
             }
             else
             {
                 TxtStatusLista.Text = $"Foram encontradas {_vagasAtuais.Count} oportunidades ({novas} novas identificadas e adicionadas ao banco local).";
                 TxtStatusRodape.Text = $"Busca concluída: {_vagasAtuais.Count} vagas encontradas ({novas} novas, {jaVistas} já catalogadas).";
+                BtnCarregarMaisTopo.IsEnabled = true;
+                PanelCarregarMais.Visibility = Visibility.Visible;
             }
 
             AtualizarEstatisticasEBanco();
@@ -199,6 +218,117 @@ public partial class MainWindow : Window
         {
             BtnBuscar.IsEnabled = true;
             BtnExportar.IsEnabled = true;
+            BtnCarregarMaisTopo.IsEnabled = _vagasAtuais.Count > 0;
+            BtnCarregarMaisFim.IsEnabled = true;
+            PanelCarregarMais.Visibility = _vagasAtuais.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            ProgressBusca.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private async void BtnCarregarMais_Click(object sender, RoutedEventArgs e)
+    {
+        if (_ultimosTermosBusca.Count == 0)
+        {
+            BtnBuscar_Click(sender, e);
+            return;
+        }
+
+        BtnBuscar.IsEnabled = false;
+        BtnExportar.IsEnabled = false;
+        BtnCarregarMaisTopo.IsEnabled = false;
+        BtnCarregarMaisFim.IsEnabled = false;
+        ProgressBusca.Visibility = Visibility.Visible;
+
+        int proximaPagina = _paginaAtual + 1;
+        const int qtdPaginas = 2;
+        TxtStatusRodape.Text = $"Buscando mais vagas (páginas {proximaPagina} e {proximaPagina + qtdPaginas - 1})...";
+
+        try
+        {
+            var novasVagasColetadas = new List<Vaga>();
+            var idsExistentes = new HashSet<long>(_vagasAtuais.Select(v => v.Id));
+
+            await Task.Run(async () =>
+            {
+                foreach (var termo in _ultimosTermosBusca)
+                {
+                    var resultados = await _apiService.BuscarVagasPorPalavraAsync(
+                        termo,
+                        _ultimoFiltroEstado,
+                        _ultimoFiltroCidade,
+                        paginaInicial: proximaPagina,
+                        quantidadePaginas: qtdPaginas
+                    );
+
+                    foreach (var v in resultados)
+                    {
+                        if (!idsExistentes.Contains(v.Id))
+                        {
+                            v.Area = _ultimaAreaNome;
+                            idsExistentes.Add(v.Id);
+                            novasVagasColetadas.Add(v);
+                        }
+                    }
+                }
+            });
+
+            _paginaAtual += qtdPaginas;
+
+            if (novasVagasColetadas.Count > 0)
+            {
+                int novasNoBanco = 0;
+                int jaVistasNoBanco = 0;
+
+                foreach (var vaga in novasVagasColetadas)
+                {
+                    bool ehNova = _databaseService.SalvarVaga(vaga);
+                    if (ehNova) novasNoBanco++;
+                    else jaVistasNoBanco++;
+                }
+
+                _vagasAtuais.AddRange(novasVagasColetadas);
+
+                // Atualiza a visualização
+                ItemsVagas.ItemsSource = null;
+                ItemsVagas.ItemsSource = _vagasAtuais;
+                EmptyStatePlaceholder.Visibility = Visibility.Collapsed;
+
+                int totalNovas = _vagasAtuais.Count(v => v.EhNova);
+                int totalJaVistas = _vagasAtuais.Count - totalNovas;
+
+                TxtTotalEncontradas.Text = _vagasAtuais.Count.ToString();
+                TxtTotalNovas.Text = totalNovas.ToString();
+                TxtTotalJaVistas.Text = totalJaVistas.ToString();
+
+                TxtStatusLista.Text = $"Total de {_vagasAtuais.Count} vagas carregadas (+{novasVagasColetadas.Count} adicionadas nesta busca).";
+                TxtStatusRodape.Text = $"+{novasVagasColetadas.Count} novas vagas adicionadas à lista (Total: {_vagasAtuais.Count} vagas).";
+
+                AtualizarEstatisticasEBanco();
+                CarregarVagasFavoritas();
+            }
+            else
+            {
+                TxtStatusRodape.Text = $"Não foram encontradas novas vagas nas páginas {proximaPagina}-{proximaPagina + qtdPaginas - 1}.";
+                MessageBox.Show(
+                    "Não foram encontradas vagas adicionais para os filtros e termos selecionados nas próximas páginas da Gupy.",
+                    "Fim dos Resultados",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ocorreu um erro ao carregar mais vagas: {ex.Message}", "Erro de Comunicação", MessageBoxButton.OK, MessageBoxImage.Error);
+            TxtStatusRodape.Text = "Erro durante o carregamento de mais vagas.";
+        }
+        finally
+        {
+            BtnBuscar.IsEnabled = true;
+            BtnExportar.IsEnabled = true;
+            BtnCarregarMaisTopo.IsEnabled = _vagasAtuais.Count > 0;
+            BtnCarregarMaisFim.IsEnabled = true;
+            PanelCarregarMais.Visibility = _vagasAtuais.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             ProgressBusca.Visibility = Visibility.Collapsed;
         }
     }
