@@ -62,7 +62,7 @@ public class GupyApiService
         string? estadoFiltro = null,
         string? cidadeFiltro = null,
         int limitePorPagina = 50,
-        int maximoPaginas = 2,
+        int maximoPaginas = 3,
         CancellationToken cancellationToken = default)
     {
         var vagas = new List<Vaga>();
@@ -70,10 +70,15 @@ public class GupyApiService
 
         string estadoNorm = VagaClassifierService.Normalizar(estadoFiltro);
         string cidadeNorm = VagaClassifierService.Normalizar(cidadeFiltro);
+        string termoTratado = palavraChave?.Trim() ?? string.Empty;
+        string encodedTerm = Uri.EscapeDataString(termoTratado);
 
         for (int pagina = 1; pagina <= maximoPaginas; pagina++)
         {
-            string url = $"https://portal.gupy.io/_next/data/{buildId}/vagas.json?jobName={Uri.EscapeDataString(palavraChave)}&page={pagina}";
+            // O endpoint direto de pesquisa no portal Gupy é job-search/term={termo}.json
+            string url = string.IsNullOrWhiteSpace(encodedTerm)
+                ? $"https://portal.gupy.io/_next/data/{buildId}/vagas.json?page={pagina}"
+                : $"https://portal.gupy.io/_next/data/{buildId}/job-search/term={encodedTerm}.json?page={pagina}";
 
             GupyNextDataResponse? nextData = null;
             try
@@ -82,18 +87,30 @@ public class GupyApiService
             }
             catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                // Se der 404, o buildId pode ter sido renovado pela Gupy: força renovação e tenta novamente
+                // Se der 404, tenta renovar o buildId
                 _lastBuildIdCheck = DateTime.MinValue;
                 buildId = await ObterBuildIdAsync(cancellationToken);
-                url = $"https://portal.gupy.io/_next/data/{buildId}/vagas.json?jobName={Uri.EscapeDataString(palavraChave)}&page={pagina}";
+                url = string.IsNullOrWhiteSpace(encodedTerm)
+                    ? $"https://portal.gupy.io/_next/data/{buildId}/vagas.json?page={pagina}"
+                    : $"https://portal.gupy.io/_next/data/{buildId}/job-search/term={encodedTerm}.json?page={pagina}";
+
                 try
                 {
                     nextData = await _httpClient.GetFromJsonAsync<GupyNextDataResponse>(url, cancellationToken);
                 }
-                catch (Exception retryEx)
+                catch
                 {
-                    System.Diagnostics.Debug.WriteLine($"Erro na tentativa com novo buildId: {retryEx.Message}");
-                    break;
+                    // Fallback para endpoint de vagas geral com parâmetro de busca
+                    try
+                    {
+                        string fallbackUrl = $"https://portal.gupy.io/_next/data/{buildId}/vagas.json?jobName={encodedTerm}&page={pagina}";
+                        nextData = await _httpClient.GetFromJsonAsync<GupyNextDataResponse>(fallbackUrl, cancellationToken);
+                    }
+                    catch (Exception exFallback)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Erro no fallback de vagas: {exFallback.Message}");
+                        break;
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -102,7 +119,7 @@ public class GupyApiService
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao consultar vagas da Gupy para '{palavraChave}': {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Erro ao consultar vagas para '{palavraChave}' página {pagina}: {ex.Message}");
                 break;
             }
 
@@ -118,17 +135,22 @@ public class GupyApiService
                 string itemCidadeNorm = VagaClassifierService.Normalizar(item.City);
                 string itemTituloNorm = VagaClassifierService.Normalizar(item.Name);
 
-                // Filtro de Estado (verifica campo de estado e menções no título)
+                bool ehRemoto = item.WorkplaceType?.Equals("remote", StringComparison.OrdinalIgnoreCase) == true
+                    || itemCidadeNorm.Contains("remoto")
+                    || itemTituloNorm.Contains("remoto")
+                    || itemTituloNorm.Contains("home office");
+
+                // Filtro de Estado (casamento de estado OU vaga remota)
                 if (!string.IsNullOrEmpty(estadoNorm))
                 {
-                    bool matchEstado = itemEstadoNorm.Contains(estadoNorm) || itemTituloNorm.Contains(estadoNorm);
+                    bool matchEstado = itemEstadoNorm.Contains(estadoNorm) || itemTituloNorm.Contains(estadoNorm) || ehRemoto;
                     if (!matchEstado) continue;
                 }
 
-                // Filtro de Cidade (verifica campo de cidade e menções no título)
+                // Filtro de Cidade (casamento de cidade OU vaga remota)
                 if (!string.IsNullOrEmpty(cidadeNorm))
                 {
-                    bool matchCidade = itemCidadeNorm.Contains(cidadeNorm) || itemTituloNorm.Contains(cidadeNorm);
+                    bool matchCidade = itemCidadeNorm.Contains(cidadeNorm) || itemTituloNorm.Contains(cidadeNorm) || ehRemoto;
                     if (!matchCidade) continue;
                 }
 
@@ -137,8 +159,8 @@ public class GupyApiService
                     Id = item.Id,
                     Titulo = item.Name ?? "Vaga sem título",
                     Empresa = item.CareerPageName ?? "Empresa confidencial",
-                    Cidade = item.City ?? string.Empty,
-                    Estado = item.State ?? string.Empty,
+                    Cidade = item.City ?? (ehRemoto ? "Remoto" : string.Empty),
+                    Estado = item.State ?? (ehRemoto ? "Brasil" : string.Empty),
                     Url = string.IsNullOrWhiteSpace(item.JobUrl) ? $"https://portal.gupy.io/vagas/{item.Id}" : item.JobUrl,
                     Tipo = item.Type ?? string.Empty,
                     Nivel = VagaClassifierService.DetectarNivel(item.Name),

@@ -112,13 +112,13 @@ public partial class MainWindow : Window
             {
                 if (termosDeBusca.Count == 0)
                 {
-                    termosDeBusca.AddRange(new[] { "desenvolvedor", "programador", "software", "analista ti" });
+                    termosDeBusca.AddRange(new[] { "desenvolvedor", "programador", "software", "tecnologia" });
                 }
             }
             else
             {
-                // Pega as 3 primeiras palavras-chave da área para uma busca rápida e relevante
-                termosDeBusca.AddRange(areaSelecionada.PalavrasChave.Take(3));
+                // Pega as palavras-chave da área para uma busca abrangente e relevante
+                termosDeBusca.AddRange(areaSelecionada.PalavrasChave.Take(4));
             }
         }
 
@@ -140,7 +140,7 @@ public partial class MainWindow : Window
                         filtroEstado,
                         filtroCidade,
                         limitePorPagina: 50,
-                        maximoPaginas: 2
+                        maximoPaginas: 3
                     );
 
                     foreach (var v in resultados)

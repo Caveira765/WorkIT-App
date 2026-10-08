@@ -50,6 +50,9 @@ public class GupyJobItem
     [JsonPropertyName("jobUrl")]
     public string? JobUrl { get; set; }
 
+    [JsonPropertyName("workplaceType")]
+    public string? WorkplaceType { get; set; }
+
     [JsonPropertyName("description")]
     public string? Description { get; set; }
 }
