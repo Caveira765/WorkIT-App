@@ -10,7 +10,7 @@ Projeto desenvolvido para a disciplina de **Desenvolvimento de Software Visual**
 
 ---
 
-## 🚀 Como Rodar o Projeto
+## Como Rodar o Projeto
 
 ### Opção 1: 1 Clique com o Arquivo "Executar.bat"
 Basta dar duplo clique no arquivo `Executar.bat` na raiz do projeto. Ele detecta automaticamente o executável Release compilado ou roda via .NET.
@@ -27,7 +27,7 @@ Você também pode rodar o arquivo compilado diretamente sem precisar do termina
 
 ---
 
-## 🛠️ Tecnologias e Bibliotecas
+## Tecnologias e Bibliotecas
 
 | Tecnologia | Finalidade no Projeto |
 | :--- | :--- |
@@ -40,7 +40,7 @@ Você também pode rodar o arquivo compilado diretamente sem precisar do termina
 
 ---
 
-## 📂 Estrutura de Pastas e Código
+## Estrutura de Pastas e Código
 
 ```text
 WorkIT.App/
@@ -65,7 +65,7 @@ WorkIT.App/
 
 ---
 
-## ✨ Funcionalidades do Sistema
+## Funcionalidades do Sistema
 
 1. **Filtros Dinâmicos:**
    * 11 áreas de TI mapeadas (RPA, Fullstack, Frontend, Backend, Cybersecurity, Dados/BI, DevOps, Mobile, QA, Redes, IA) + opção "Todas as Áreas".
