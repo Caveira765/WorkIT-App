@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Microsoft.Win32;
 using WorkIT.App.Data;
 using WorkIT.App.Models;
@@ -15,36 +16,230 @@ namespace WorkIT.App;
 
 public partial class MainWindow : Window
 {
-    private readonly GupyApiService _apiService;
-    private readonly DatabaseService _databaseService;
+    private readonly GupyApiService _apiService = new();
+    private readonly DatabaseService _databaseService = new();
+
+    // Lista completa da busca atual e lista filtrada exibida na tela
+    private List<Vaga> _todasVagasCarregadas = new();
     private List<Vaga> _vagasAtuais = new();
+
     private int _paginaAtual = 1;
     private List<string> _ultimosTermosBusca = new();
     private string? _ultimoFiltroEstado;
     private string? _ultimoFiltroCidade;
     private string _ultimaAreaNome = "Geral";
+    private bool _temaClaroAtivo;
+    private bool _inicializando;
 
     public MainWindow()
     {
+        _inicializando = true;
         InitializeComponent();
 
-        _apiService = new GupyApiService();
-        _databaseService = new DatabaseService();
-
-        InicializarFiltros();
+        InicializarCombos();
+        CarregarPreferenciasUsuario();
         AtualizarEstatisticasEBanco();
         CarregarVagasFavoritas();
+        _inicializando = false;
     }
 
-    private void InicializarFiltros()
+    private void InicializarCombos()
     {
+        // Combos da barra de filtros
         CmbArea.ItemsSource = VagaClassifierService.Areas;
-        CmbArea.SelectedIndex = 0; // Todas as áreas
+        CmbArea.SelectedIndex = 0;
+
+        CmbNivel.ItemsSource = VagaClassifierService.Niveis;
+        CmbNivel.SelectedIndex = 0;
 
         CmbEstado.ItemsSource = VagaClassifierService.Estados;
-        CmbEstado.SelectedIndex = 0; // Todos os estados
+        CmbEstado.SelectedIndex = 0;
+
+        // Combos da aba de Preferências
+        CmbPrefArea.ItemsSource = VagaClassifierService.Areas;
+        CmbPrefArea.SelectedIndex = 0;
+
+        CmbPrefNivel.ItemsSource = VagaClassifierService.Niveis;
+        CmbPrefNivel.SelectedIndex = 0;
+
+        CmbPrefEstado.ItemsSource = VagaClassifierService.Estados;
+        CmbPrefEstado.SelectedIndex = 0;
     }
 
+    // =========================================================
+    // GERENCIAMENTO DE TEMA (ESCURO / CLARO)
+    // =========================================================
+    private void AplicarTema(bool temaClaro)
+    {
+        _temaClaroAtivo = temaClaro;
+
+        void DefinirCor(string chave, string hexEscuro, string hexClaro)
+        {
+            string hex = temaClaro ? hexClaro : hexEscuro;
+            var color = (Color)ColorConverter.ConvertFromString(hex);
+            Resources[chave] = new SolidColorBrush(color);
+        }
+
+        DefinirCor("BgWindow", "#0d0e17", "#f1f5f9");
+        DefinirCor("BgHeader", "#12131f", "#ffffff");
+        DefinirCor("BgFilterBar", "#141524", "#f8fafc");
+        DefinirCor("BgCard", "#161828", "#ffffff");
+        DefinirCor("BgSubCard", "#191d30", "#f1f5f9");
+        DefinirCor("BgInput", "#191b2c", "#ffffff");
+        DefinirCor("BgInputHover", "#202338", "#f1f5f9");
+        DefinirCor("BgPopup", "#141524", "#ffffff");
+        DefinirCor("BgSecondaryBtn", "#191b2c", "#ffffff");
+        DefinirCor("BgSecondaryBtnHover", "#25283f", "#e2e8f0");
+        DefinirCor("BgCardActionBtn", "#252a42", "#eff6ff");
+        DefinirCor("FgCardActionBtn", "#f8fafc", "#1d4ed8");
+
+        DefinirCor("BorderPrimary", "#1f2235", "#e2e8f0");
+        DefinirCor("BorderCard", "#25293d", "#cbd5e1");
+        DefinirCor("BorderInput", "#2e334d", "#cbd5e1");
+
+        DefinirCor("TextPrimary", "#f8fafc", "#0f172a");
+        DefinirCor("TextSecondary", "#94a3b8", "#475569");
+        DefinirCor("TextMuted", "#64748b", "#64748b");
+        DefinirCor("TextHighlight", "#93c5fd", "#2563eb");
+
+        DefinirCor("ChipEncontradasBg", "#162035", "#eff6ff");
+        DefinirCor("ChipNovasBg", "#122c22", "#ecfdf5");
+        DefinirCor("ChipJaVistasBg", "#1c202d", "#e2e8f0");
+        DefinirCor("ChipBancoBg", "#241738", "#f5f3ff");
+
+        TxtBotaoTema.Text = temaClaro ? "🌙 Tema Escuro" : "☀️ Tema Claro";
+        ChkPrefTemaClaro.IsChecked = temaClaro;
+    }
+
+    private void BtnAlternarTema_Click(object sender, RoutedEventArgs e)
+    {
+        AplicarTema(!_temaClaroAtivo);
+
+        var pref = _databaseService.ObterPreferencias();
+        pref.TemaClaro = _temaClaroAtivo;
+        _databaseService.SalvarPreferencias(pref);
+
+        TxtStatusRodape.Text = _temaClaroAtivo ? "Tema Claro ativado." : "Tema Escuro ativado.";
+    }
+
+    // =========================================================
+    // NAVEGAÇÃO DA TELA INICIAL ("O QUE FAZEMOS")
+    // =========================================================
+    private void BtnAbrirInicio_Click(object sender, RoutedEventArgs e)
+    {
+        TelaInicialOverlay.Visibility = Visibility.Visible;
+    }
+
+    private void BtnComecarExplorar_Click(object sender, RoutedEventArgs e)
+    {
+        TelaInicialOverlay.Visibility = Visibility.Collapsed;
+        MainTabs.SelectedIndex = 0;
+    }
+
+    private void BtnComecarPreferencias_Click(object sender, RoutedEventArgs e)
+    {
+        TelaInicialOverlay.Visibility = Visibility.Collapsed;
+        MainTabs.SelectedIndex = 3;
+    }
+
+    // =========================================================
+    // CADASTRO E APLICAÇÃO DE PREFERÊNCIAS DO USUÁRIO
+    // =========================================================
+    private void CarregarPreferenciasUsuario()
+    {
+        var pref = _databaseService.ObterPreferencias();
+
+        // Preenche aba de preferências
+        TxtPrefNome.Text = pref.NomeUsuario;
+        TxtPrefCidade.Text = pref.Cidade;
+        ChkPrefRemoto.IsChecked = pref.ApenasRemoto;
+        ChkPrefTemaClaro.IsChecked = pref.TemaClaro;
+
+        var areaObj = VagaClassifierService.Areas.FirstOrDefault(a => a.Id == pref.AreaId) ?? VagaClassifierService.Areas[0];
+        CmbPrefArea.SelectedItem = areaObj;
+
+        string nivelValido = VagaClassifierService.Niveis.Contains(pref.NivelExperiencia)
+            ? pref.NivelExperiencia
+            : "Todos os Níveis";
+        CmbPrefNivel.SelectedItem = nivelValido;
+
+        var estadoObj = VagaClassifierService.Estados.FirstOrDefault(e => e.Sigla == pref.EstadoSigla) ?? VagaClassifierService.Estados[0];
+        CmbPrefEstado.SelectedItem = estadoObj;
+
+        // Aplica preferências aos filtros principais e ao tema
+        CmbArea.SelectedItem = areaObj;
+        CmbNivel.SelectedItem = nivelValido;
+        CmbEstado.SelectedItem = estadoObj;
+        TxtCidade.Text = pref.Cidade;
+        ChkApenasRemoto.IsChecked = pref.ApenasRemoto;
+
+        AplicarTema(pref.TemaClaro);
+        AtualizarBadgePerfil(pref);
+    }
+
+    private void AtualizarBadgePerfil(PreferenciaUsuario pref)
+    {
+        string saudacao = string.IsNullOrWhiteSpace(pref.NomeUsuario)
+            ? "Perfil"
+            : $"Olá, {pref.NomeUsuario.Trim()}";
+
+        TxtSaudacaoPerfil.Text = $"{saudacao} • Nível: {pref.NivelExperiencia}";
+    }
+
+    private void BtnSalvarPreferencias_Click(object sender, RoutedEventArgs e)
+    {
+        var areaSel = CmbPrefArea.SelectedItem as AreaModel ?? VagaClassifierService.Areas[0];
+        var estadoSel = CmbPrefEstado.SelectedItem as EstadoModel ?? VagaClassifierService.Estados[0];
+        string nivelSel = CmbPrefNivel.SelectedItem as string ?? "Todos os Níveis";
+
+        var pref = new PreferenciaUsuario
+        {
+            NomeUsuario = TxtPrefNome.Text.Trim(),
+            AreaId = areaSel.Id,
+            NivelExperiencia = nivelSel,
+            EstadoSigla = estadoSel.Sigla,
+            Cidade = TxtPrefCidade.Text.Trim(),
+            ApenasRemoto = ChkPrefRemoto.IsChecked == true,
+            TemaClaro = ChkPrefTemaClaro.IsChecked == true
+        };
+
+        _databaseService.SalvarPreferencias(pref);
+
+        _inicializando = true;
+        CmbArea.SelectedItem = areaSel;
+        CmbNivel.SelectedItem = nivelSel;
+        CmbEstado.SelectedItem = estadoSel;
+        TxtCidade.Text = pref.Cidade;
+        ChkApenasRemoto.IsChecked = pref.ApenasRemoto;
+        _inicializando = false;
+
+        AplicarTema(pref.TemaClaro);
+        AtualizarBadgePerfil(pref);
+        AplicarFiltrosLocais();
+
+        MessageBox.Show(
+            $"Suas preferências foram salvas com sucesso!\n\n• Área: {areaSel.Nome}\n• Nível: {nivelSel}\n• Local: {estadoSel.Display}",
+            "Preferências Salvas",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information
+        );
+
+        MainTabs.SelectedIndex = 0;
+        TxtStatusRodape.Text = "Preferências de perfil salvas e aplicadas aos filtros.";
+    }
+
+    private void BtnRestaurarPreferencias_Click(object sender, RoutedEventArgs e)
+    {
+        var padrao = new PreferenciaUsuario();
+        _databaseService.SalvarPreferencias(padrao);
+        CarregarPreferenciasUsuario();
+        AplicarFiltrosLocais();
+        TxtStatusRodape.Text = "Preferências restauradas para o padrão.";
+    }
+
+    // =========================================================
+    // ESTATÍSTICAS E BANCO DE DADOS LOCAL
+    // =========================================================
     private void AtualizarEstatisticasEBanco()
     {
         try
@@ -57,10 +252,42 @@ public partial class MainWindow : Window
             TxtQtdJunior.Text = stats.TryGetValue("Júnior", out int jr) ? jr.ToString() : "0";
             TxtQtdPleno.Text = stats.TryGetValue("Pleno", out int pl) ? pl.ToString() : "0";
             TxtQtdSenior.Text = stats.TryGetValue("Sênior", out int sr) ? sr.ToString() : "0";
+            TxtQtdGeral.Text = stats.TryGetValue("Geral", out int gr) ? gr.ToString() : "0";
+
+            var rankingCidades = _databaseService.ObterRankingCidades(8);
+            ItemsRankingCidades.ItemsSource = rankingCidades;
+            TxtEmptyCidades.Visibility = rankingCidades.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+            var rankingEmpresas = _databaseService.ObterRankingEmpresas(8);
+            ItemsRankingEmpresas.ItemsSource = rankingEmpresas;
+            TxtEmptyEmpresas.Visibility = rankingEmpresas.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Erro ao atualizar estatísticas: {ex.Message}");
+        }
+    }
+
+    private void BtnAtualizarEstatisticas_Click(object sender, RoutedEventArgs e)
+    {
+        AtualizarEstatisticasEBanco();
+        TxtStatusRodape.Text = "Estatísticas de cidades, empresas e níveis atualizadas.";
+    }
+
+    private void BtnLimparHistorico_Click(object sender, RoutedEventArgs e)
+    {
+        var resp = MessageBox.Show(
+            "Deseja remover do banco local as vagas do histórico que NÃO estão favoritadas?\n(Suas vagas salvas em '⭐ Vagas Salvas' serão mantidas).",
+            "Limpar Histórico",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question
+        );
+
+        if (resp == MessageBoxResult.Yes)
+        {
+            int removidas = _databaseService.LimparHistoricoNaoFavoritas();
+            AtualizarEstatisticasEBanco();
+            TxtStatusRodape.Text = $"{removidas} vagas não-favoritas removidas do histórico local.";
         }
     }
 
@@ -78,6 +305,19 @@ public partial class MainWindow : Window
         }
     }
 
+    private void BtnCarregarBanco_Click(object sender, RoutedEventArgs e)
+    {
+        _todasVagasCarregadas = _databaseService.ObterTodasSalvas();
+        PanelCarregarMais.Visibility = Visibility.Collapsed;
+        BtnCarregarMaisTopo.IsEnabled = false;
+
+        MainTabs.SelectedIndex = 0;
+        AplicarFiltrosLocais(origemBancoLocal: true);
+    }
+
+    // =========================================================
+    // BUSCA E FILTRAGEM POR NÍVEL DE EXPERIÊNCIA
+    // =========================================================
     private void Input_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
     {
         if (e.Key == System.Windows.Input.Key.Enter && BtnBuscar.IsEnabled)
@@ -86,57 +326,124 @@ public partial class MainWindow : Window
         }
     }
 
+    private void FiltroLocal_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_inicializando || _todasVagasCarregadas.Count == 0) return;
+        AplicarFiltrosLocais();
+    }
+
+    private void AplicarFiltrosLocais(bool origemBancoLocal = false)
+    {
+        string nivelSelecionado = CmbNivel.SelectedItem as string ?? "Todos os Níveis";
+        bool apenasRemoto = ChkApenasRemoto.IsChecked == true;
+
+        IEnumerable<Vaga> query = _todasVagasCarregadas;
+
+        if (nivelSelecionado != "Todos os Níveis")
+        {
+            query = query.Where(v => string.Equals(v.Nivel, nivelSelecionado, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (apenasRemoto)
+        {
+            query = query.Where(v => v.EhRemota);
+        }
+
+        _vagasAtuais = query.ToList();
+
+        ItemsVagas.ItemsSource = null;
+        ItemsVagas.ItemsSource = _vagasAtuais;
+        EmptyStatePlaceholder.Visibility = _vagasAtuais.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
+
+        int novas = _vagasAtuais.Count(v => v.EhNova);
+        int jaVistas = _vagasAtuais.Count - novas;
+
+        TxtTotalEncontradas.Text = _vagasAtuais.Count.ToString();
+        TxtTotalNovas.Text = novas.ToString();
+        TxtTotalJaVistas.Text = jaVistas.ToString();
+
+        string infoFiltro = nivelSelecionado != "Todos os Níveis" ? $" [Filtro Nível: {nivelSelecionado}]" : "";
+        if (apenasRemoto) infoFiltro += " [Só Remoto]";
+
+        if (_vagasAtuais.Count == 0)
+        {
+            TxtStatusLista.Text = $"Nenhuma vaga encontrada para os critérios atuais{infoFiltro}. Tente selecionar 'Todos os Níveis' ou carregar mais páginas.";
+            TxtStatusRodape.Text = "0 vagas correspondem ao filtro selecionado.";
+        }
+        else
+        {
+            string fonte = origemBancoLocal ? "carregadas do banco SQLite" : $"encontradas (de {_todasVagasCarregadas.Count} coletadas)";
+            TxtStatusLista.Text = $"Exibindo {_vagasAtuais.Count} oportunidades {fonte}{infoFiltro}.";
+            TxtStatusRodape.Text = $"Lista atualizada: {_vagasAtuais.Count} vagas exibidas ({novas} novas, {jaVistas} já vistas).";
+        }
+    }
+
+    private List<string> MontarTermosDeBusca(AreaModel? areaSelecionada, string termoExtra, string nivelSelecionado)
+    {
+        var termos = new List<string>();
+        string? termoNivel = VagaClassifierService.ObterTermoBuscaNivel(nivelSelecionado);
+
+        if (!string.IsNullOrWhiteSpace(termoExtra))
+        {
+            termos.Add(termoExtra);
+            if (termoNivel != null) termos.Add($"{termoExtra} {termoNivel}");
+        }
+
+        if (areaSelecionada != null)
+        {
+            if (areaSelecionada.Id == "0")
+            {
+                if (termos.Count == 0)
+                {
+                    if (termoNivel != null)
+                    {
+                        termos.AddRange(new[] { $"desenvolvedor {termoNivel}", $"ti {termoNivel}", "desenvolvedor", "software" });
+                    }
+                    else
+                    {
+                        termos.AddRange(new[] { "desenvolvedor", "programador", "software", "tecnologia" });
+                    }
+                }
+            }
+            else
+            {
+                var chavesPrincipais = areaSelecionada.PalavrasChave.Take(3).ToList();
+                if (termoNivel != null && chavesPrincipais.Count > 0)
+                {
+                    termos.Add($"{chavesPrincipais[0]} {termoNivel}");
+                }
+                termos.AddRange(chavesPrincipais);
+            }
+        }
+
+        if (termos.Count == 0)
+        {
+            termos.Add("desenvolvedor");
+        }
+
+        return termos.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+    }
+
     private async void BtnBuscar_Click(object sender, RoutedEventArgs e)
     {
-        BtnBuscar.IsEnabled = false;
-        BtnExportar.IsEnabled = false;
-        BtnCarregarMaisTopo.IsEnabled = false;
-        BtnCarregarMaisFim.IsEnabled = false;
+        AlternarEstadoBotoesBusca(ocupado: true);
         PanelCarregarMais.Visibility = Visibility.Collapsed;
-        ProgressBusca.Visibility = Visibility.Visible;
-        TxtStatusRodape.Text = "Consultando oportunidades na API pública da Gupy...";
+        TxtStatusRodape.Text = "Consultando oportunidades na API da Gupy...";
+        MainTabs.SelectedIndex = 0;
 
-        var areaSelecionada = (AreaModel)CmbArea.SelectedItem;
-        var estadoSelecionado = (EstadoModel)CmbEstado.SelectedItem;
+        var areaSelecionada = CmbArea.SelectedItem as AreaModel;
+        var estadoSelecionado = CmbEstado.SelectedItem as EstadoModel;
+        string nivelSelecionado = CmbNivel.SelectedItem as string ?? "Todos os Níveis";
         string cidade = TxtCidade.Text.Trim();
         string termoExtra = TxtTermoExtra.Text.Trim();
 
-        string? filtroEstado = string.IsNullOrWhiteSpace(estadoSelecionado?.Nome) || estadoSelecionado.Sigla == ""
+        string? filtroEstado = string.IsNullOrWhiteSpace(estadoSelecionado?.Nome) || string.IsNullOrEmpty(estadoSelecionado.Sigla)
             ? null
             : estadoSelecionado.Nome;
 
         string? filtroCidade = string.IsNullOrWhiteSpace(cidade) ? null : cidade;
 
-        List<string> termosDeBusca = new();
-
-        if (!string.IsNullOrWhiteSpace(termoExtra))
-        {
-            termosDeBusca.Add(termoExtra);
-        }
-
-        if (areaSelecionada != null)
-        {
-            if (areaSelecionada.Id == "0") // Todas as áreas
-            {
-                if (termosDeBusca.Count == 0)
-                {
-                    termosDeBusca.AddRange(new[] { "desenvolvedor", "programador", "software", "tecnologia" });
-                }
-            }
-            else
-            {
-                // Pega as palavras-chave da área para uma busca abrangente e relevante
-                termosDeBusca.AddRange(areaSelecionada.PalavrasChave.Take(4));
-            }
-        }
-
-        if (termosDeBusca.Count == 0)
-        {
-            termosDeBusca.Add("desenvolvedor");
-        }
-
-        // Armazena contexto para buscas subsequentes com o botão "Mais Vagas"
-        _ultimosTermosBusca = termosDeBusca;
+        _ultimosTermosBusca = MontarTermosDeBusca(areaSelecionada, termoExtra, nivelSelecionado);
         _ultimoFiltroEstado = filtroEstado;
         _ultimoFiltroCidade = filtroCidade;
         _ultimaAreaNome = areaSelecionada?.Nome ?? "Geral";
@@ -148,7 +455,7 @@ public partial class MainWindow : Window
 
             await Task.Run(async () =>
             {
-                foreach (var termo in termosDeBusca)
+                foreach (var termo in _ultimosTermosBusca)
                 {
                     var resultados = await _apiService.BuscarVagasPorPalavraAsync(
                         termo,
@@ -169,43 +476,14 @@ public partial class MainWindow : Window
                 }
             });
 
-            _vagasAtuais = vagasMapeadas.Values.ToList();
+            _todasVagasCarregadas = vagasMapeadas.Values.ToList();
 
-            // Salva no banco SQLite e verifica novidade
-            int novas = 0;
-            int jaVistas = 0;
-
-            foreach (var vaga in _vagasAtuais)
+            foreach (var vaga in _todasVagasCarregadas)
             {
-                bool ehNova = _databaseService.SalvarVaga(vaga);
-                if (ehNova) novas++;
-                else jaVistas++;
+                _databaseService.SalvarVaga(vaga);
             }
 
-            // Atualiza UI
-            ItemsVagas.ItemsSource = null;
-            ItemsVagas.ItemsSource = _vagasAtuais;
-            EmptyStatePlaceholder.Visibility = _vagasAtuais.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
-
-            TxtTotalEncontradas.Text = _vagasAtuais.Count.ToString();
-            TxtTotalNovas.Text = novas.ToString();
-            TxtTotalJaVistas.Text = jaVistas.ToString();
-
-            if (_vagasAtuais.Count == 0)
-            {
-                TxtStatusLista.Text = "Nenhuma oportunidade encontrada para os filtros selecionados. Tente alterar a área ou palavra-chave.";
-                TxtStatusRodape.Text = "Busca concluída: 0 vagas encontradas.";
-                BtnCarregarMaisTopo.IsEnabled = false;
-                PanelCarregarMais.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                TxtStatusLista.Text = $"Foram encontradas {_vagasAtuais.Count} oportunidades ({novas} novas identificadas e adicionadas ao banco local).";
-                TxtStatusRodape.Text = $"Busca concluída: {_vagasAtuais.Count} vagas encontradas ({novas} novas, {jaVistas} já catalogadas).";
-                BtnCarregarMaisTopo.IsEnabled = true;
-                PanelCarregarMais.Visibility = Visibility.Visible;
-            }
-
+            AplicarFiltrosLocais();
             AtualizarEstatisticasEBanco();
             CarregarVagasFavoritas();
         }
@@ -216,12 +494,7 @@ public partial class MainWindow : Window
         }
         finally
         {
-            BtnBuscar.IsEnabled = true;
-            BtnExportar.IsEnabled = true;
-            BtnCarregarMaisTopo.IsEnabled = _vagasAtuais.Count > 0;
-            BtnCarregarMaisFim.IsEnabled = true;
-            PanelCarregarMais.Visibility = _vagasAtuais.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-            ProgressBusca.Visibility = Visibility.Collapsed;
+            AlternarEstadoBotoesBusca(ocupado: false);
         }
     }
 
@@ -233,11 +506,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        BtnBuscar.IsEnabled = false;
-        BtnExportar.IsEnabled = false;
-        BtnCarregarMaisTopo.IsEnabled = false;
-        BtnCarregarMaisFim.IsEnabled = false;
-        ProgressBusca.Visibility = Visibility.Visible;
+        AlternarEstadoBotoesBusca(ocupado: true);
 
         int proximaPagina = _paginaAtual + 1;
         const int qtdPaginas = 2;
@@ -246,7 +515,7 @@ public partial class MainWindow : Window
         try
         {
             var novasVagasColetadas = new List<Vaga>();
-            var idsExistentes = new HashSet<long>(_vagasAtuais.Select(v => v.Id));
+            var idsExistentes = new HashSet<long>(_todasVagasCarregadas.Select(v => v.Id));
 
             await Task.Run(async () =>
             {
@@ -262,10 +531,9 @@ public partial class MainWindow : Window
 
                     foreach (var v in resultados)
                     {
-                        if (!idsExistentes.Contains(v.Id))
+                        if (idsExistentes.Add(v.Id))
                         {
                             v.Area = _ultimaAreaNome;
-                            idsExistentes.Add(v.Id);
                             novasVagasColetadas.Add(v);
                         }
                     }
@@ -276,41 +544,23 @@ public partial class MainWindow : Window
 
             if (novasVagasColetadas.Count > 0)
             {
-                int novasNoBanco = 0;
-                int jaVistasNoBanco = 0;
-
                 foreach (var vaga in novasVagasColetadas)
                 {
-                    bool ehNova = _databaseService.SalvarVaga(vaga);
-                    if (ehNova) novasNoBanco++;
-                    else jaVistasNoBanco++;
+                    _databaseService.SalvarVaga(vaga);
                 }
 
-                _vagasAtuais.AddRange(novasVagasColetadas);
-
-                // Atualiza a visualização
-                ItemsVagas.ItemsSource = null;
-                ItemsVagas.ItemsSource = _vagasAtuais;
-                EmptyStatePlaceholder.Visibility = Visibility.Collapsed;
-
-                int totalNovas = _vagasAtuais.Count(v => v.EhNova);
-                int totalJaVistas = _vagasAtuais.Count - totalNovas;
-
-                TxtTotalEncontradas.Text = _vagasAtuais.Count.ToString();
-                TxtTotalNovas.Text = totalNovas.ToString();
-                TxtTotalJaVistas.Text = totalJaVistas.ToString();
-
-                TxtStatusLista.Text = $"Total de {_vagasAtuais.Count} vagas carregadas (+{novasVagasColetadas.Count} adicionadas nesta busca).";
-                TxtStatusRodape.Text = $"+{novasVagasColetadas.Count} novas vagas adicionadas à lista (Total: {_vagasAtuais.Count} vagas).";
-
+                _todasVagasCarregadas.AddRange(novasVagasColetadas);
+                AplicarFiltrosLocais();
                 AtualizarEstatisticasEBanco();
                 CarregarVagasFavoritas();
+
+                TxtStatusRodape.Text = $"+{novasVagasColetadas.Count} novas vagas carregadas da API (Total na sessão: {_todasVagasCarregadas.Count}).";
             }
             else
             {
-                TxtStatusRodape.Text = $"Não foram encontradas novas vagas nas páginas {proximaPagina}-{proximaPagina + qtdPaginas - 1}.";
+                TxtStatusRodape.Text = $"Não foram encontradas vagas inéditas nas páginas {proximaPagina}-{proximaPagina + qtdPaginas - 1}.";
                 MessageBox.Show(
-                    "Não foram encontradas vagas adicionais para os filtros e termos selecionados nas próximas páginas da Gupy.",
+                    "Não foram encontradas vagas adicionais para os filtros selecionados nas próximas páginas.",
                     "Fim dos Resultados",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information
@@ -324,18 +574,29 @@ public partial class MainWindow : Window
         }
         finally
         {
-            BtnBuscar.IsEnabled = true;
-            BtnExportar.IsEnabled = true;
-            BtnCarregarMaisTopo.IsEnabled = _vagasAtuais.Count > 0;
-            BtnCarregarMaisFim.IsEnabled = true;
-            PanelCarregarMais.Visibility = _vagasAtuais.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-            ProgressBusca.Visibility = Visibility.Collapsed;
+            AlternarEstadoBotoesBusca(ocupado: false);
         }
     }
 
+    private void AlternarEstadoBotoesBusca(bool ocupado)
+    {
+        BtnBuscar.IsEnabled = !ocupado;
+        BtnExportar.IsEnabled = !ocupado;
+        BtnCarregarBanco.IsEnabled = !ocupado;
+        BtnCarregarMaisTopo.IsEnabled = !ocupado && _todasVagasCarregadas.Count > 0;
+        BtnCarregarMaisFim.IsEnabled = !ocupado;
+        PanelCarregarMais.Visibility = (!ocupado && _todasVagasCarregadas.Count > 0 && _ultimosTermosBusca.Count > 0)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        ProgressBusca.Visibility = ocupado ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // =========================================================
+    // AÇÕES DOS CARDS E EXPORTAÇÃO CSV
+    // =========================================================
     private void BtnAbrirLink_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Vaga vaga && !string.IsNullOrWhiteSpace(vaga.Url))
+        if (sender is Button { Tag: Vaga vaga } && !string.IsNullOrWhiteSpace(vaga.Url))
         {
             try
             {
@@ -351,27 +612,29 @@ public partial class MainWindow : Window
 
     private void BtnFavoritar_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Vaga vaga)
+        if (sender is Button { Tag: Vaga vaga })
         {
             vaga.Favorita = !vaga.Favorita;
             _databaseService.AlternarFavorita(vaga.Id, vaga.Favorita);
 
-            // Atualiza a lista de vagas para refletir o binding
             ItemsVagas.Items.Refresh();
             CarregarVagasFavoritas();
 
             TxtStatusRodape.Text = vaga.Favorita
-                ? $"Vaga #{vaga.Id} favoritada com sucesso!"
+                ? $"Vaga #{vaga.Id} salva nos favoritos!"
                 : $"Vaga #{vaga.Id} removida dos favoritos.";
         }
     }
 
     private void BtnRemoverFavorita_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Tag is Vaga vaga)
+        if (sender is Button { Tag: Vaga vaga })
         {
             vaga.Favorita = false;
             _databaseService.AlternarFavorita(vaga.Id, false);
+
+            var itemNaLista = _todasVagasCarregadas.FirstOrDefault(v => v.Id == vaga.Id);
+            if (itemNaLista != null) itemNaLista.Favorita = false;
 
             CarregarVagasFavoritas();
             ItemsVagas.Items.Refresh();
@@ -389,7 +652,7 @@ public partial class MainWindow : Window
     {
         if (_vagasAtuais.Count == 0)
         {
-            MessageBox.Show("Nenhuma vaga encontrada na lista para exportar. Realize uma busca primeiro.", "Exportação", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Nenhuma vaga na lista atual para exportar. Realize uma busca ou carregue o banco primeiro.", "Exportação", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 

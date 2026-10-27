@@ -2,12 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using WorkIT.App.Models;
 
 namespace WorkIT.App.Services;
 
 public class VagaClassifierService
 {
+    public static readonly List<string> Niveis = new()
+    {
+        "Todos os Níveis",
+        "Estágio",
+        "Júnior",
+        "Pleno",
+        "Sênior",
+        "Geral"
+    };
+
     public static readonly List<AreaModel> Areas = new()
     {
         new AreaModel
@@ -135,24 +146,40 @@ public class VagaClassifierService
         return stringBuilder.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant().Trim();
     }
 
+    /// <summary>
+    /// Classifica o nível de experiência com base no título da vaga usando limites de palavra (\b)
+    /// para evitar falsos positivos (ex: "pl" dentro de "plataforma").
+    /// </summary>
     public static string DetectarNivel(string? titulo)
     {
-        if (string.IsNullOrWhiteSpace(titulo)) return "Não identificado";
+        if (string.IsNullOrWhiteSpace(titulo)) return "Geral";
 
         string normalizado = Normalizar(titulo);
 
-        if (normalizado.Contains("estagio") || normalizado.Contains("estagiario") || normalizado.Contains("intern") || normalizado.Contains("trainee"))
+        if (Regex.IsMatch(normalizado, @"\b(estagio|estagiario|estagiaria|intern|trainee|aprendiz)\b"))
             return "Estágio";
 
-        if (normalizado.Contains("junior") || normalizado.Contains("jr"))
+        if (Regex.IsMatch(normalizado, @"\b(junior|jr)\b") || Regex.IsMatch(normalizado, @"\b(dev|desenvolvedor|analista|engenheiro)\s+i\b"))
             return "Júnior";
 
-        if (normalizado.Contains("senior") || normalizado.Contains("sr") || normalizado.Contains("especialista") || normalizado.Contains("lead") || normalizado.Contains("principal"))
+        if (Regex.IsMatch(normalizado, @"\b(senior|sr|especialista|lead|principal|arquiteto|coordenador|iii)\b"))
             return "Sênior";
 
-        if (normalizado.Contains("pleno") || normalizado.Contains("pl"))
+        if (Regex.IsMatch(normalizado, @"\b(pleno|pl|mid|ii)\b"))
             return "Pleno";
 
         return "Geral";
+    }
+
+    public static string? ObterTermoBuscaNivel(string? nivel)
+    {
+        return nivel switch
+        {
+            "Estágio" => "estagio",
+            "Júnior" => "junior",
+            "Pleno" => "pleno",
+            "Sênior" => "senior",
+            _ => null
+        };
     }
 }

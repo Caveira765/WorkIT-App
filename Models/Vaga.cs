@@ -20,7 +20,7 @@ public class Vaga : INotifyPropertyChanged
     public string Estado { get; set; } = string.Empty;
     public string Url { get; set; } = string.Empty;
     public string Tipo { get; set; } = string.Empty;
-    public string Nivel { get; set; } = "Não identificado";
+    public string Nivel { get; set; } = "Geral";
     public string DataPublicacao { get; set; } = string.Empty;
     public string DataSalvo { get; set; } = string.Empty;
     public string Area { get; set; } = string.Empty;
@@ -53,10 +53,22 @@ public class Vaga : INotifyPropertyChanged
         }
     }
 
+    // Indica se a vaga é remota (Home Office)
+    public bool EhRemota =>
+        Cidade.Contains("Remoto", StringComparison.OrdinalIgnoreCase) ||
+        Titulo.Contains("Remoto", StringComparison.OrdinalIgnoreCase) ||
+        Titulo.Contains("Home Office", StringComparison.OrdinalIgnoreCase) ||
+        (string.IsNullOrWhiteSpace(Cidade) && string.IsNullOrWhiteSpace(Estado));
+
     // Propriedades formatadas para exibição direta nos Cards
     public string LocalFormatado => string.IsNullOrWhiteSpace(Cidade) && string.IsNullOrWhiteSpace(Estado)
-        ? "Remoto / Não informado"
-        : $"{(string.IsNullOrWhiteSpace(Cidade) ? "Brasil" : Cidade)} / {(string.IsNullOrWhiteSpace(Estado) ? "N/A" : Estado)}";
+        ? "Remoto / Brasil"
+        : $"{(string.IsNullOrWhiteSpace(Cidade) ? "Brasil" : Cidade)} / {(string.IsNullOrWhiteSpace(Estado) ? "BR" : Estado)}";
+
+    public string DataPublicacaoFormatada =>
+        DateTime.TryParse(DataPublicacao, out var dt)
+            ? dt.ToString("dd/MM/yyyy")
+            : (string.IsNullOrWhiteSpace(DataPublicacao) ? "Data não informada" : DataPublicacao);
 
     public string StatusBadge => EhNova ? "NOVA" : "JÁ VISTA";
 

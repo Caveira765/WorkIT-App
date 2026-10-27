@@ -6,33 +6,46 @@
         xmlns:local="clr-namespace:WorkIT.App"
         xmlns:models="clr-namespace:WorkIT.App.Models"
         mc:Ignorable="d"
-        Title="WorkIT — Painel de Vagas &amp; Rastreador TI" Height="780" Width="1140"
+        Title="WorkIT — Painel de Vagas &amp; Rastreador TI" Height="800" Width="1200"
         Icon="Assets/app.ico"
-        MinHeight="680" MinWidth="980"
+        MinHeight="680" MinWidth="1020"
         WindowStartupLocation="CenterScreen"
-        Background="#0d0e17"
+        Background="{DynamicResource BgWindow}"
         FontFamily="Segoe UI">
 
     <Window.Resources>
-        <!-- Paleta de Cores Moderna (Dark / VS Code / Catppuccin) -->
-        <SolidColorBrush x:Key="BgDark" Color="#0d0e17"/>
-        <SolidColorBrush x:Key="BgSurface" Color="#151624"/>
-        <SolidColorBrush x:Key="BgCard" Color="#1a1c2d"/>
-        <SolidColorBrush x:Key="BorderDark" Color="#2a2e47"/>
+        <!-- ========================================== -->
+        <!-- PALETA DE CORES DINÂMICA (DARK / LIGHT)    -->
+        <!-- ========================================== -->
+        <SolidColorBrush x:Key="BgWindow" Color="#0d0e17"/>
+        <SolidColorBrush x:Key="BgHeader" Color="#12131f"/>
+        <SolidColorBrush x:Key="BgFilterBar" Color="#141524"/>
+        <SolidColorBrush x:Key="BgCard" Color="#161828"/>
+        <SolidColorBrush x:Key="BgSubCard" Color="#191d30"/>
+        <SolidColorBrush x:Key="BgInput" Color="#191b2c"/>
+        <SolidColorBrush x:Key="BgInputHover" Color="#202338"/>
+        <SolidColorBrush x:Key="BgPopup" Color="#141524"/>
+        <SolidColorBrush x:Key="BgSecondaryBtn" Color="#191b2c"/>
+        <SolidColorBrush x:Key="BgSecondaryBtnHover" Color="#25283f"/>
+        <SolidColorBrush x:Key="BgCardActionBtn" Color="#252a42"/>
+        <SolidColorBrush x:Key="FgCardActionBtn" Color="#f8fafc"/>
 
-        <SolidColorBrush x:Key="AccentBlue" Color="#3b82f6"/>
-        <SolidColorBrush x:Key="AccentBlueHover" Color="#2563eb"/>
-        <SolidColorBrush x:Key="AccentEmerald" Color="#10b981"/>
-        <SolidColorBrush x:Key="AccentPurple" Color="#8b5cf6"/>
-        <SolidColorBrush x:Key="AccentCyan" Color="#06b6d4"/>
-        <SolidColorBrush x:Key="AccentAmber" Color="#f59e0b"/>
+        <SolidColorBrush x:Key="BorderPrimary" Color="#1f2235"/>
+        <SolidColorBrush x:Key="BorderCard" Color="#25293d"/>
+        <SolidColorBrush x:Key="BorderInput" Color="#2e334d"/>
 
         <SolidColorBrush x:Key="TextPrimary" Color="#f8fafc"/>
         <SolidColorBrush x:Key="TextSecondary" Color="#94a3b8"/>
         <SolidColorBrush x:Key="TextMuted" Color="#64748b"/>
+        <SolidColorBrush x:Key="TextHighlight" Color="#93c5fd"/>
+
+        <SolidColorBrush x:Key="ChipEncontradasBg" Color="#162035"/>
+        <SolidColorBrush x:Key="ChipNovasBg" Color="#122c22"/>
+        <SolidColorBrush x:Key="ChipJaVistasBg" Color="#1c202d"/>
+        <SolidColorBrush x:Key="ChipBancoBg" Color="#241738"/>
 
         <!-- ========================================== -->
-        <!-- SCROLLBAR MINIMALISTA DARK (O "SLIDER")    -->
+        <!-- SCROLLBAR MINIMALISTA                      -->
         <!-- ========================================== -->
         <Style x:Key="MinimalScrollBarThumb" TargetType="Thumb">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -40,10 +53,10 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Thumb">
-                        <Border x:Name="ThumbBorder" Background="#2e334d" CornerRadius="4" Margin="1,0"/>
+                        <Border x:Name="ThumbBorder" Background="{DynamicResource BorderInput}" CornerRadius="4" Margin="1,0"/>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ThumbBorder" Property="Background" Value="#475569"/>
+                                <Setter TargetName="ThumbBorder" Property="Background" Value="#64748b"/>
                             </Trigger>
                             <Trigger Property="IsDragging" Value="True">
                                 <Setter TargetName="ThumbBorder" Property="Background" Value="#3b82f6"/>
@@ -63,7 +76,7 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ScrollBar">
-                                <Grid Background="#0d0e17">
+                                <Grid Background="Transparent">
                                     <Track x:Name="PART_Track" IsDirectionReversed="True">
                                         <Track.Thumb>
                                             <Thumb Style="{StaticResource MinimalScrollBarThumb}"/>
@@ -79,7 +92,7 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ScrollBar">
-                                <Grid Background="#0d0e17">
+                                <Grid Background="Transparent">
                                     <Track x:Name="PART_Track">
                                         <Track.Thumb>
                                             <Thumb Style="{StaticResource MinimalScrollBarThumb}"/>
@@ -94,7 +107,7 @@
         </Style>
 
         <!-- ========================================== -->
-        <!-- ESTILO COMBOBOX ITEM 100% DARK             -->
+        <!-- ESTILO COMBOBOX & COMBOBOX ITEM            -->
         <!-- ========================================== -->
         <Style TargetType="ComboBoxItem">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -103,16 +116,16 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBoxItem">
-                        <Border x:Name="ItemBorder" Background="#171928" Padding="12,8" CornerRadius="6" Margin="2,1" Cursor="Hand">
-                            <ContentPresenter ContentSource="Content" TextElement.Foreground="#e2e8f0"/>
+                        <Border x:Name="ItemBorder" Background="{DynamicResource BgPopup}" Padding="12,8" CornerRadius="6" Margin="2,1" Cursor="Hand">
+                            <ContentPresenter ContentSource="Content" TextElement.Foreground="{DynamicResource TextPrimary}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#252b45"/>
-                                <Setter Property="TextElement.Foreground" Value="#60a5fa"/>
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource BgInputHover}"/>
+                                <Setter Property="TextElement.Foreground" Value="#3b82f6"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#1d4ed8"/>
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#2563eb"/>
                                 <Setter Property="TextElement.Foreground" Value="#ffffff"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -121,21 +134,19 @@
             </Setter>
         </Style>
 
-        <!-- ========================================== -->
-        <!-- ESTILO COMBOBOX COM POPUP DARK             -->
-        <!-- ========================================== -->
         <Style TargetType="ComboBox">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Height" Value="38"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid x:Name="MainGrid">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition MinWidth="34" Width="34"/>
+                                <ColumnDefinition MinWidth="32" Width="32"/>
                             </Grid.ColumnDefinitions>
 
                             <ToggleButton x:Name="ToggleButton" Grid.ColumnSpan="2" Focusable="False"
@@ -143,53 +154,50 @@
                                           ClickMode="Press" Cursor="Hand">
                                 <ToggleButton.Template>
                                     <ControlTemplate TargetType="ToggleButton">
-                                        <Border x:Name="Border" CornerRadius="7" Background="#191b2c" BorderBrush="#2e334d" BorderThickness="1">
+                                        <Border x:Name="Border" CornerRadius="7" Background="{DynamicResource BgInput}" BorderBrush="{DynamicResource BorderInput}" BorderThickness="1">
                                             <Grid>
-                                                <Border x:Name="ArrowBorder" HorizontalAlignment="Right" Width="34">
+                                                <Border HorizontalAlignment="Right" Width="32">
                                                     <Path x:Name="Arrow" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                          Data="M 0 0 L 4.5 4.5 L 9 0 Z" Fill="#94a3b8"/>
+                                                          Data="M 0 0 L 4.5 4.5 L 9 0 Z" Fill="{DynamicResource TextSecondary}"/>
                                                 </Border>
                                             </Grid>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="Border" Property="BorderBrush" Value="#475569"/>
-                                                <Setter TargetName="Border" Property="Background" Value="#202338"/>
-                                                <Setter TargetName="Arrow" Property="Fill" Value="#f8fafc"/>
+                                                <Setter TargetName="Border" Property="BorderBrush" Value="#3b82f6"/>
+                                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource BgInputHover}"/>
                                             </Trigger>
                                             <Trigger Property="IsChecked" Value="True">
-                                                <Setter TargetName="Border" Property="BorderBrush" Value="#3b82f6"/>
-                                                <Setter TargetName="Arrow" Property="Fill" Value="#3b82f6"/>
+                                                <Setter TargetName="Border" Property="BorderBrush" Value="#2563eb"/>
+                                                <Setter TargetName="Arrow" Property="Fill" Value="#2563eb"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </ToggleButton.Template>
                             </ToggleButton>
 
-                            <!-- Texto Selecionado -->
                             <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
                                               Content="{TemplateBinding SelectionBoxItem}"
                                               ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                               ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                              Margin="12,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                              Margin="11,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
                                 <ContentPresenter.Resources>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#f8fafc"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                                         <Setter Property="FontSize" Value="13"/>
                                     </Style>
                                 </ContentPresenter.Resources>
                             </ContentPresenter>
 
-                            <!-- Dropdown Popup 100% Dark -->
                             <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
                                    AllowsTransparency="True" Focusable="False" PopupAnimation="Slide" VerticalOffset="4">
                                 <Grid x:Name="DropDown" SnapsToDevicePixels="True"
                                       MinWidth="{Binding ActualWidth, ElementName=MainGrid}"
                                       MaxHeight="260">
-                                    <Border x:Name="DropDownBorder" Background="#141524" BorderBrush="#323753"
+                                    <Border Background="{DynamicResource BgPopup}" BorderBrush="{DynamicResource BorderInput}"
                                             BorderThickness="1" CornerRadius="8" Padding="4">
                                         <Border.Effect>
-                                            <DropShadowEffect BlurRadius="16" Direction="270" ShadowDepth="4" Opacity="0.45" Color="#000000"/>
+                                            <DropShadowEffect BlurRadius="14" Direction="270" ShadowDepth="4" Opacity="0.3" Color="#000000"/>
                                         </Border.Effect>
                                         <ScrollViewer SnapsToDevicePixels="True" VerticalScrollBarVisibility="Auto">
                                             <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
@@ -204,15 +212,15 @@
         </Style>
 
         <!-- ========================================== -->
-        <!-- ESTILO TEXTBOX DARK                        -->
+        <!-- ESTILO TEXTBOX                             -->
         <!-- ========================================== -->
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="#191b2c"/>
-            <Setter Property="Foreground" Value="#f8fafc"/>
+            <Setter Property="Background" Value="{DynamicResource BgInput}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="CaretBrush" Value="#3b82f6"/>
-            <Setter Property="BorderBrush" Value="#2e334d"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderInput}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Padding" Value="11,8"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Height" Value="38"/>
             <Setter Property="Template">
@@ -226,11 +234,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#475569"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#3b82f6"/>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="#3b82f6"/>
-                                <Setter TargetName="Border" Property="Background" Value="#1c1f33"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#2563eb"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -246,7 +253,7 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Height" Value="38"/>
-            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Padding" Value="16,0"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -273,8 +280,8 @@
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="BtnBorder" Property="Background" Value="#334155"/>
-                                <Setter Property="Foreground" Value="#94a3b8"/>
+                                <Setter TargetName="BtnBorder" Property="Background" Value="#64748b"/>
+                                <Setter Property="Foreground" Value="#cbd5e1"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -283,13 +290,13 @@
         </Style>
 
         <Style x:Key="SecondaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#191b2c"/>
-            <Setter Property="Foreground" Value="#e2e8f0"/>
+            <Setter Property="Background" Value="{DynamicResource BgSecondaryBtn}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Height" Value="38"/>
-            <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="BorderBrush" Value="#2e334d"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderInput}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -303,8 +310,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="BtnBorder" Property="Background" Value="#25283f"/>
-                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#475569"/>
+                                <Setter TargetName="BtnBorder" Property="Background" Value="{DynamicResource BgSecondaryBtnHover}"/>
+                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="#3b82f6"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -313,8 +323,8 @@
         </Style>
 
         <Style x:Key="CardActionButton" TargetType="Button">
-            <Setter Property="Background" Value="#252a42"/>
-            <Setter Property="Foreground" Value="#f8fafc"/>
+            <Setter Property="Background" Value="{DynamicResource BgCardActionBtn}"/>
+            <Setter Property="Foreground" Value="{DynamicResource FgCardActionBtn}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="14,8"/>
@@ -328,7 +338,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ActionBorder" Property="Background" Value="#3b82f6"/>
+                                <Setter TargetName="ActionBorder" Property="Background" Value="#2563eb"/>
                                 <Setter Property="Foreground" Value="#ffffff"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -338,7 +348,7 @@
         </Style>
 
         <!-- ======================================================== -->
-        <!-- ESTILO TABCONTROL & TABITEM (AMBOS OS LADOS REDONDOS)    -->
+        <!-- ESTILO TABCONTROL & TABITEM                              -->
         <!-- ======================================================== -->
         <Style TargetType="TabControl">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -351,11 +361,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-
-                            <!-- Barra de Navegação Horizontal sem interferência do TabPanel legado -->
-                            <StackPanel Orientation="Horizontal" IsItemsHost="True" Margin="0,0,0,14"/>
-
-                            <!-- Conteúdo da Aba Ativa -->
+                            <StackPanel Orientation="Horizontal" IsItemsHost="True" Margin="0,0,0,12"/>
                             <ContentPresenter Grid.Row="1" ContentSource="SelectedContent"/>
                         </Grid>
                     </ControlTemplate>
@@ -366,16 +372,15 @@
         <Style TargetType="TabItem">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Setter Property="Foreground" Value="#94a3b8"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
-                        <!-- CornerRadius 8 garante cantos 100% arredondados à esquerda e à direita -->
-                        <Border x:Name="TabBorder" Background="#161828" BorderBrush="#25293d" BorderThickness="1" CornerRadius="8" Padding="20,10">
+                        <Border x:Name="TabBorder" Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="8" Padding="18,9">
                             <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -389,8 +394,8 @@
                                     <Condition Property="IsMouseOver" Value="True"/>
                                     <Condition Property="IsSelected" Value="False"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="TabBorder" Property="Background" Value="#20243b"/>
-                                <Setter Property="Foreground" Value="#f1f5f9"/>
+                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#3b82f6"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                             </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -400,239 +405,248 @@
     </Window.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Top Bar Header -->
-            <RowDefinition Height="Auto"/> <!-- Filter Bar -->
-            <RowDefinition Height="*"/>    <!-- Main Content (Tabs) -->
-            <RowDefinition Height="Auto"/> <!-- Status Bar -->
-        </Grid.RowDefinitions>
+        <!-- ======================================================== -->
+        <!-- CAMADA PRINCIPAL DO SISTEMA                              -->
+        <!-- ======================================================== -->
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- 0: Cabeçalho Superior -->
+                <RowDefinition Height="Auto"/> <!-- 1: Barra de Filtros -->
+                <RowDefinition Height="*"/>    <!-- 2: Abas de Conteúdo -->
+                <RowDefinition Height="Auto"/> <!-- 3: Rodapé -->
+            </Grid.RowDefinitions>
 
-        <!-- 1. CABEÇALHO SUPERIOR -->
-        <Border Grid.Row="0" Background="#12131f" BorderBrush="#1f2235" BorderThickness="0,0,0,1" Padding="24,14">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Logo & Identidade -->
-                <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border CornerRadius="8" Width="38" Height="38" Margin="0,0,12,0" BorderBrush="#2a334e" BorderThickness="1">
-                            <Border.Background>
-                                <ImageBrush ImageSource="Assets/logo.png" Stretch="UniformToFill"/>
-                            </Border.Background>
-                        </Border>
-                        <TextBlock Text="WorkIT" FontSize="22" FontWeight="ExtraBold" Foreground="#f8fafc" VerticalAlignment="Center"/>
-                        <Border Background="#1f233a" BorderBrush="#313754" BorderThickness="1" CornerRadius="5" Margin="12,0,0,0" Padding="8,3" VerticalAlignment="Center">
-                            <TextBlock Text="v1.0 • C# / .NET 10" FontSize="11" FontWeight="SemiBold" Foreground="#93c5fd"/>
-                        </Border>
-                    </StackPanel>
-                    <TextBlock Text="Painel do Desenvolvedor — Rastreador e Centralizador de Vagas de TI" FontSize="12" Foreground="#94a3b8" Margin="50,2,0,0"/>
-                </StackPanel>
-
-                <!-- Cards Métricas Rápidas no Topo -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <!-- Chip Total Encontradas -->
-                    <Border Background="#162035" BorderBrush="#2563eb" BorderThickness="1" CornerRadius="8" Padding="14,7" Margin="5,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📋 Encontradas: " FontSize="12" Foreground="#94a3b8"/>
-                            <TextBlock x:Name="TxtTotalEncontradas" Text="0" FontWeight="Bold" FontSize="13" Foreground="#60a5fa"/>
-                        </StackPanel>
-                    </Border>
-                    <!-- Chip Novas -->
-                    <Border Background="#122c22" BorderBrush="#10b981" BorderThickness="1" CornerRadius="8" Padding="14,7" Margin="5,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="✨ Novas: " FontSize="12" Foreground="#94a3b8"/>
-                            <TextBlock x:Name="TxtTotalNovas" Text="0" FontWeight="Bold" FontSize="13" Foreground="#34d399"/>
-                        </StackPanel>
-                    </Border>
-                    <!-- Chip Já Vistas -->
-                    <Border Background="#1c202d" BorderBrush="#475569" BorderThickness="1" CornerRadius="8" Padding="14,7" Margin="5,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="👁️ Já Vistas: " FontSize="12" Foreground="#94a3b8"/>
-                            <TextBlock x:Name="TxtTotalJaVistas" Text="0" FontWeight="Bold" FontSize="13" Foreground="#cbd5e1"/>
-                        </StackPanel>
-                    </Border>
-                    <!-- Chip Banco Local -->
-                    <Border Background="#241738" BorderBrush="#8b5cf6" BorderThickness="1" CornerRadius="8" Padding="14,7" Margin="5,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="💾 No Banco: " FontSize="12" Foreground="#94a3b8"/>
-                            <TextBlock x:Name="TxtTotalBanco" Text="0" FontWeight="Bold" FontSize="13" Foreground="#c084fc"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- 2. BARRA DE FILTROS -->
-        <Border Grid.Row="1" Background="#141524" BorderBrush="#1f2235" BorderThickness="0,0,0,1" Padding="24,14">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0">
+            <!-- 1. CABEÇALHO SUPERIOR -->
+            <Border Grid.Row="0" Background="{DynamicResource BgHeader}" BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="0,0,0,1" Padding="22,12">
+                <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2.2*"/> <!-- Área -->
-                        <ColumnDefinition Width="1.4*"/> <!-- Estado -->
-                        <ColumnDefinition Width="1.7*"/> <!-- Cidade -->
-                        <ColumnDefinition Width="1.9*"/> <!-- Palavra-chave extra -->
-                        <ColumnDefinition Width="Auto"/> <!-- Botão Buscar -->
-                        <ColumnDefinition Width="Auto"/> <!-- Botão Mais Vagas (Topo) -->
-                        <ColumnDefinition Width="Auto"/> <!-- Botão CSV -->
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- Filtro Área -->
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="Área de TI:" FontSize="12" FontWeight="SemiBold" Foreground="#94a3b8" Margin="0,0,0,6"/>
-                        <ComboBox x:Name="CmbArea" DisplayMemberPath="Nome"/>
-                    </StackPanel>
-
-                    <!-- Filtro Estado -->
-                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                        <TextBlock Text="Estado (UF):" FontSize="12" FontWeight="SemiBold" Foreground="#94a3b8" Margin="0,0,0,6"/>
-                        <ComboBox x:Name="CmbEstado" DisplayMemberPath="Display"/>
-                    </StackPanel>
-
-                    <!-- Filtro Cidade -->
-                    <StackPanel Grid.Column="2" Margin="0,0,12,0">
-                        <TextBlock Text="Cidade (opcional):" FontSize="12" FontWeight="SemiBold" Foreground="#94a3b8" Margin="0,0,0,6"/>
-                        <TextBox x:Name="TxtCidade" Text="" KeyDown="Input_KeyDown"/>
-                    </StackPanel>
-
-                    <!-- Filtro Palavra Extra -->
-                    <StackPanel Grid.Column="3" Margin="0,0,14,0">
-                        <TextBlock Text="Palavra-chave adicional:" FontSize="12" FontWeight="SemiBold" Foreground="#94a3b8" Margin="0,0,0,6"/>
-                        <TextBox x:Name="TxtTermoExtra" Text="" KeyDown="Input_KeyDown"/>
-                    </StackPanel>
-
-                    <!-- Botão Buscar -->
-                    <Button x:Name="BtnBuscar" Grid.Column="4" Style="{StaticResource PrimaryButton}" Margin="0,20,8,0" Click="BtnBuscar_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🔍 " FontSize="12"/>
-                            <TextBlock Text="Buscar Vagas"/>
+                    <!-- Logo & Identidade -->
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border CornerRadius="8" Width="36" Height="36" Margin="0,0,12,0" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1">
+                                <Border.Background>
+                                    <ImageBrush ImageSource="Assets/logo.png" Stretch="UniformToFill"/>
+                                </Border.Background>
+                            </Border>
+                            <TextBlock Text="WorkIT" FontSize="21" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                            <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="5" Margin="10,0,0,0" Padding="8,3" VerticalAlignment="Center">
+                                <TextBlock x:Name="TxtSaudacaoPerfil" Text="Perfil: Todos os Níveis" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextHighlight}"/>
+                            </Border>
                         </StackPanel>
-                    </Button>
+                        <TextBlock Text="Painel do Desenvolvedor — Rastreador e Centralizador de Vagas de TI" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="48,2,0,0"/>
+                    </StackPanel>
 
-                    <!-- Botão Mais Vagas (Topo) -->
-                    <Button x:Name="BtnCarregarMaisTopo" Grid.Column="5" Style="{StaticResource SecondaryButton}" Margin="0,20,8,0" Click="BtnCarregarMais_Click" ToolTip="Carregar mais páginas de vagas para a pesquisa atual" IsEnabled="False">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="➕ " FontSize="12"/>
-                            <TextBlock Text="Mais Vagas"/>
-                        </StackPanel>
-                    </Button>
+                    <!-- Métricas Rápidas + Botões de Início e Tema -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Chip Encontradas -->
+                        <Border Background="{DynamicResource ChipEncontradasBg}" BorderBrush="#2563eb" BorderThickness="1" CornerRadius="8" Padding="12,6" Margin="4,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📋 Na Lista: " FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock x:Name="TxtTotalEncontradas" Text="0" FontWeight="Bold" FontSize="13" Foreground="#3b82f6"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Chip Novas -->
+                        <Border Background="{DynamicResource ChipNovasBg}" BorderBrush="#10b981" BorderThickness="1" CornerRadius="8" Padding="12,6" Margin="4,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="✨ Novas: " FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock x:Name="TxtTotalNovas" Text="0" FontWeight="Bold" FontSize="13" Foreground="#10b981"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Chip Já Vistas -->
+                        <Border Background="{DynamicResource ChipJaVistasBg}" BorderBrush="#64748b" BorderThickness="1" CornerRadius="8" Padding="12,6" Margin="4,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="👁️ Já Vistas: " FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock x:Name="TxtTotalJaVistas" Text="0" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Chip Banco Local -->
+                        <Border Background="{DynamicResource ChipBancoBg}" BorderBrush="#8b5cf6" BorderThickness="1" CornerRadius="8" Padding="12,6" Margin="4,0,12,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="💾 No Banco: " FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock x:Name="TxtTotalBanco" Text="0" FontWeight="Bold" FontSize="13" Foreground="#8b5cf6"/>
+                            </StackPanel>
+                        </Border>
 
-                    <!-- Botão Exportar CSV -->
-                    <Button x:Name="BtnExportar" Grid.Column="6" Style="{StaticResource SecondaryButton}" Margin="0,20,0,0" Click="BtnExportar_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="📥 " FontSize="12"/>
-                            <TextBlock Text="Exportar CSV"/>
-                        </StackPanel>
-                    </Button>
+                        <!-- Botão Tela Inicial -->
+                        <Button Style="{StaticResource SecondaryButton}" Height="34" Padding="12,0" Margin="0,0,8,0" Click="BtnAbrirInicio_Click" ToolTip="Voltar para a tela de apresentação do WorkIT">
+                            <TextBlock Text="🏠 Início" FontSize="12"/>
+                        </Button>
+
+                        <!-- Botão Alternar Tema (Claro / Escuro) -->
+                        <Button x:Name="BtnAlternarTema" Style="{StaticResource SecondaryButton}" Height="34" Padding="12,0" Click="BtnAlternarTema_Click" ToolTip="Alternar entre Tema Escuro e Tema Claro">
+                            <TextBlock x:Name="TxtBotaoTema" Text="☀️ Tema Claro" FontSize="12"/>
+                        </Button>
+                    </StackPanel>
                 </Grid>
+            </Border>
 
-                <!-- Barra de Carregamento Indeterminada -->
-                <ProgressBar x:Name="ProgressBusca" Grid.Row="1" Height="3" IsIndeterminate="True" Visibility="Collapsed" Margin="0,12,0,0" Background="#191b2c" Foreground="#3b82f6" BorderThickness="0"/>
-            </Grid>
-        </Border>
-
-        <!-- 3. ABAS DE CONTEÚDO PRINCIPAL -->
-        <TabControl x:Name="MainTabs" Grid.Row="2" Background="Transparent" BorderThickness="0" Margin="24,14,24,12">
-
-            <!-- ABA 1: OPORTUNIDADES ENCONTRADAS -->
-            <TabItem Header="Oportunidades Encontradas">
-                <Grid Margin="0,6,0,0">
+            <!-- 2. BARRA DE FILTROS -->
+            <Border Grid.Row="1" Background="{DynamicResource BgFilterBar}" BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="0,0,0,1" Padding="22,12">
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Status Text -->
-                    <Grid Grid.Row="0" Margin="2,0,2,10">
-                        <TextBlock x:Name="TxtStatusLista" Text="Nenhuma busca realizada ainda." FontSize="13" Foreground="#94a3b8"/>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.8*"/> <!-- Área -->
+                            <ColumnDefinition Width="1.3*"/> <!-- Nível de Experiência -->
+                            <ColumnDefinition Width="1.3*"/> <!-- Estado -->
+                            <ColumnDefinition Width="1.3*"/> <!-- Cidade -->
+                            <ColumnDefinition Width="1.5*"/> <!-- Palavra-chave -->
+                            <ColumnDefinition Width="Auto"/> <!-- Checkbox Só Remoto -->
+                            <ColumnDefinition Width="Auto"/> <!-- Buscar -->
+                            <ColumnDefinition Width="Auto"/> <!-- Mais Vagas -->
+                            <ColumnDefinition Width="Auto"/> <!-- Banco Local -->
+                            <ColumnDefinition Width="Auto"/> <!-- Exportar CSV -->
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Filtro Área -->
+                        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                            <TextBlock Text="Área de TI:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="CmbArea" DisplayMemberPath="Nome"/>
+                        </StackPanel>
+
+                        <!-- Filtro Nível de Experiência -->
+                        <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                            <TextBlock Text="Seu Nível:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="CmbNivel" SelectionChanged="FiltroLocal_Changed"/>
+                        </StackPanel>
+
+                        <!-- Filtro Estado -->
+                        <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                            <TextBlock Text="Estado (UF):" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,5"/>
+                            <ComboBox x:Name="CmbEstado" DisplayMemberPath="Display"/>
+                        </StackPanel>
+
+                        <!-- Filtro Cidade -->
+                        <StackPanel Grid.Column="3" Margin="0,0,10,0">
+                            <TextBlock Text="Cidade:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,5"/>
+                            <TextBox x:Name="TxtCidade" Text="" KeyDown="Input_KeyDown"/>
+                        </StackPanel>
+
+                        <!-- Filtro Palavra Extra -->
+                        <StackPanel Grid.Column="4" Margin="0,0,12,0">
+                            <TextBlock Text="Palavra-chave:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,5"/>
+                            <TextBox x:Name="TxtTermoExtra" Text="" KeyDown="Input_KeyDown"/>
+                        </StackPanel>
+
+                        <!-- Filtro Rápido Remoto -->
+                        <CheckBox x:Name="ChkApenasRemoto" Grid.Column="5" VerticalAlignment="Bottom" Margin="0,0,12,9"
+                                  Foreground="{DynamicResource TextPrimary}" FontSize="12" FontWeight="SemiBold" Cursor="Hand"
+                                  Content="🏠 Só Remoto" Checked="FiltroLocal_Changed" Unchecked="FiltroLocal_Changed"/>
+
+                        <!-- Botão Buscar -->
+                        <Button x:Name="BtnBuscar" Grid.Column="6" Style="{StaticResource PrimaryButton}" Margin="0,19,6,0" Click="BtnBuscar_Click">
+                            <TextBlock Text="🔍 Buscar Vagas"/>
+                        </Button>
+
+                        <!-- Botão Mais Vagas (Topo) -->
+                        <Button x:Name="BtnCarregarMaisTopo" Grid.Column="7" Style="{StaticResource SecondaryButton}" Margin="0,19,6,0" Click="BtnCarregarMais_Click" ToolTip="Carregar mais páginas da pesquisa atual" IsEnabled="False">
+                            <TextBlock Text="➕ Mais Vagas"/>
+                        </Button>
+
+                        <!-- Botão Ver Banco Local -->
+                        <Button x:Name="BtnCarregarBanco" Grid.Column="8" Style="{StaticResource SecondaryButton}" Margin="0,19,6,0" Click="BtnCarregarBanco_Click" ToolTip="Carregar todas as vagas salvas no banco local SQLite">
+                            <TextBlock Text="💾 Ver Banco"/>
+                        </Button>
+
+                        <!-- Botão Exportar CSV -->
+                        <Button x:Name="BtnExportar" Grid.Column="9" Style="{StaticResource SecondaryButton}" Margin="0,19,0,0" Click="BtnExportar_Click" ToolTip="Exportar vagas da lista atual para planilha CSV">
+                            <TextBlock Text="📥 CSV"/>
+                        </Button>
                     </Grid>
 
-                    <!-- Empty State amigável quando ainda não buscou nada -->
-                    <Border x:Name="EmptyStatePlaceholder" Grid.Row="1" Background="#131522" BorderBrush="#202438" BorderThickness="1" CornerRadius="12" Padding="40,35" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="620">
-                        <StackPanel HorizontalAlignment="Center">
-                            <Border Background="#1e253e" Width="64" Height="64" CornerRadius="32" HorizontalAlignment="Center" Margin="0,0,0,16">
-                                <TextBlock Text="💼" FontSize="30" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Pronto para encontrar sua próxima vaga?" FontSize="18" FontWeight="Bold" Foreground="#f8fafc" Margin="0,0,0,8" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Selecione sua área de interesse (Frontend, Backend, RPA, etc.), escolha o estado ou digite uma cidade nos filtros acima e clique em 'Buscar Vagas'." FontSize="13" Foreground="#94a3b8" TextWrapping="Wrap" LineHeight="19" TextAlignment="Center" Margin="0,0,0,20"/>
+                    <!-- Barra de Carregamento Indeterminada -->
+                    <ProgressBar x:Name="ProgressBusca" Grid.Row="1" Height="3" IsIndeterminate="True" Visibility="Collapsed" Margin="0,10,0,0" Background="{DynamicResource BgInput}" Foreground="#3b82f6" BorderThickness="0"/>
+                </Grid>
+            </Border>
 
-                            <!-- Destaques -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Border Background="#191d30" BorderBrush="#2c3454" BorderThickness="1" CornerRadius="6" Padding="10,5" Margin="4,0">
-                                    <TextBlock Text="⚡ API Pública da Gupy" FontSize="11" Foreground="#93c5fd"/>
+            <!-- 3. ABAS DE CONTEÚDO PRINCIPAL -->
+            <TabControl x:Name="MainTabs" Grid.Row="2" Background="Transparent" BorderThickness="0" Margin="22,12,22,10">
+
+                <!-- ========================================== -->
+                <!-- ABA 1: OPORTUNIDADES ENCONTRADAS           -->
+                <!-- ========================================== -->
+                <TabItem Header="💼 Oportunidades Encontradas">
+                    <Grid Margin="0,4,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock x:Name="TxtStatusLista" Grid.Row="0" Margin="2,0,2,10" Text="Nenhuma busca realizada ainda." FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
+
+                        <!-- Empty State -->
+                        <Border x:Name="EmptyStatePlaceholder" Grid.Row="1" Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="12" Padding="40,32" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="640">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Background="{DynamicResource BgSubCard}" Width="60" Height="60" CornerRadius="30" HorizontalAlignment="Center" Margin="0,0,0,14">
+                                    <TextBlock Text="💼" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
-                                <Border Background="#191d30" BorderBrush="#2c3454" BorderThickness="1" CornerRadius="6" Padding="10,5" Margin="4,0">
-                                    <TextBlock Text="🏷️ Classificação Automática" FontSize="11" Foreground="#93c5fd"/>
-                                </Border>
-                                <Border Background="#191d30" BorderBrush="#2c3454" BorderThickness="1" CornerRadius="6" Padding="10,5" Margin="4,0">
-                                    <TextBlock Text="💾 SQLite Idempotente" FontSize="11" Foreground="#93c5fd"/>
-                                </Border>
+                                <TextBlock Text="Pronto para encontrar sua próxima vaga de TI?" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Escolha sua área de interesse e seu nível de experiência nos filtros acima e clique em '🔍 Buscar Vagas', ou clique em '💾 Ver Banco' para consultar as vagas já salvas no SQLite." FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" LineHeight="19" TextAlignment="Center" Margin="0,0,0,18"/>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Style="{StaticResource PrimaryButton}" Content="🔍 Buscar Vagas Agora" Click="BtnBuscar_Click" Margin="0,0,10,0"/>
+                                    <Button Style="{StaticResource SecondaryButton}" Content="💾 Carregar do Banco Local" Click="BtnCarregarBanco_Click"/>
+                                </StackPanel>
                             </StackPanel>
-                        </StackPanel>
-                    </Border>
+                        </Border>
 
-                    <!-- Lista de Cards de Vagas (Com ScrollBar Minimalista Dark) -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <ItemsControl x:Name="ItemsVagas">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type models:Vaga}">
-                                        <Border Background="#161828" BorderBrush="#25293d" BorderThickness="1" CornerRadius="10" Margin="0,0,10,12" Padding="18,16">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                        <!-- Lista de Cards de Vagas -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <ItemsControl x:Name="ItemsVagas">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type models:Vaga}">
+                                            <Border Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Margin="0,0,10,10" Padding="18,14">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
 
-                                                <!-- Informações da Vaga -->
-                                                <StackPanel Grid.Column="0">
-                                                    <!-- Badges de Status e Nível -->
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                                        <!-- Badge Nova vs Já Vista -->
-                                                        <Border Background="{Binding BadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
-                                                            <TextBlock Text="{Binding StatusBadge}" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                                        </Border>
-                                                        <!-- Badge Nível -->
-                                                        <Border Background="{Binding NivelBadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
-                                                            <TextBlock Text="{Binding Nivel}" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                                        </Border>
-                                                        <!-- ID da vaga -->
-                                                        <TextBlock Text="{Binding Id, StringFormat='#{0}'}" FontSize="11" Foreground="#64748b" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-
-                                                    <!-- Título da Vaga -->
-                                                    <TextBlock Text="{Binding Titulo}" FontSize="16" FontWeight="Bold" Foreground="#f8fafc" TextWrapping="Wrap" Margin="0,0,0,6"/>
-
-                                                    <!-- Empresa e Local -->
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                        <TextBlock Text="🏢 " FontSize="12"/>
-                                                        <TextBlock Text="{Binding Empresa}" FontSize="13" FontWeight="SemiBold" Foreground="#93c5fd" Margin="0,0,16,0"/>
-                                                        <TextBlock Text="📍 " FontSize="12"/>
-                                                        <TextBlock Text="{Binding LocalFormatado}" FontSize="13" Foreground="#cbd5e1"/>
-                                                    </StackPanel>
-
-                                                    <!-- Data Publicação -->
-                                                    <TextBlock Text="{Binding DataPublicacao, StringFormat='Publicado em: {0}'}" FontSize="11" Foreground="#64748b"/>
-                                                </StackPanel>
-
-                                                <!-- Ações no Card -->
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
-                                                    <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnAbrirLink_Click" Margin="0,0,0,8" MinWidth="155">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock Text="🌐 " FontSize="12"/>
-                                                            <TextBlock Text="Abrir no Navegador"/>
+                                                    <StackPanel Grid.Column="0">
+                                                        <!-- Badges de Status, Nível e Área -->
+                                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,7">
+                                                            <Border Background="{Binding BadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
+                                                                <TextBlock Text="{Binding StatusBadge}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                            </Border>
+                                                            <Border Background="{Binding NivelBadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
+                                                                <TextBlock Text="{Binding Nivel}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                            </Border>
+                                                            <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="4" Padding="7,2" Margin="0,0,8,0">
+                                                                <TextBlock Text="{Binding Area}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}"/>
+                                                            </Border>
+                                                            <TextBlock Text="{Binding Id, StringFormat='#{0}'}" FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"/>
                                                         </StackPanel>
-                                                    </Button>
 
-                                                    <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnFavoritar_Click" MinWidth="155">
+                                                        <!-- Título da Vaga -->
+                                                        <TextBlock Text="{Binding Titulo}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap" Margin="0,0,0,6"/>
+
+                                                        <!-- Empresa, Cidade e Data -->
                                                         <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="🏢 " FontSize="12"/>
+                                                            <TextBlock Text="{Binding Empresa}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextHighlight}" Margin="0,0,16,0"/>
+                                                            <TextBlock Text="📍 " FontSize="12"/>
+                                                            <TextBlock Text="{Binding LocalFormatado}" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,0,16,0"/>
+                                                            <TextBlock Text="📅 " FontSize="12"/>
+                                                            <TextBlock Text="{Binding DataPublicacaoFormatada}" FontSize="12" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+                                                    <!-- Ações no Card -->
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="16,0,0,0">
+                                                        <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnAbrirLink_Click" Margin="0,0,0,7" MinWidth="150">
+                                                            <TextBlock Text="🌐 Abrir no Navegador"/>
+                                                        </Button>
+
+                                                        <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnFavoritar_Click" MinWidth="150">
                                                             <TextBlock>
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
@@ -640,13 +654,95 @@
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding Favorita}" Value="True">
                                                                                 <Setter Property="Text" Value="★ Vaga Salva"/>
-                                                                                <Setter Property="Foreground" Value="#fbbf24"/>
+                                                                                <Setter Property="Foreground" Value="#f59e0b"/>
                                                                             </DataTrigger>
                                                                         </Style.Triggers>
                                                                     </Style>
                                                                 </TextBlock.Style>
                                                             </TextBlock>
-                                                        </StackPanel>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Botão Carregar Mais Vagas (Final da Lista) -->
+                                <Border x:Name="PanelCarregarMais" Visibility="Collapsed" Margin="0,8,10,24" HorizontalAlignment="Center">
+                                    <Button x:Name="BtnCarregarMaisFim" Style="{StaticResource PrimaryButton}" Height="42" Padding="26,0" Click="BtnCarregarMais_Click">
+                                        <TextBlock Text="📥 Carregar Mais Vagas (+ Próximas Páginas)" FontSize="13" FontWeight="Bold"/>
+                                    </Button>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <!-- ========================================== -->
+                <!-- ABA 2: VAGAS FAVORITAS / SALVAS            -->
+                <!-- ========================================== -->
+                <TabItem Header="⭐ Vagas Salvas">
+                    <Grid Margin="0,4,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0" Margin="2,0,2,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Oportunidades favoritadas e salvas no banco local SQLite para acompanhamento:" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="🔄 Atualizar Salvas" Click="BtnRecarregarFavoritas_Click"/>
+                        </Grid>
+
+                        <Border x:Name="EmptyStateFavoritas" Grid.Row="1" Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="12" Padding="40,32" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="600">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Border Background="{DynamicResource BgSubCard}" Width="58" Height="58" CornerRadius="29" HorizontalAlignment="Center" Margin="0,0,0,12">
+                                    <TextBlock Text="⭐" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Nenhuma vaga favoritada ainda" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,6" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Pesquise oportunidades na primeira aba e clique em '⭐ Salvar Vaga' para guardar suas vagas preferidas aqui." FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="ItemsFavoritas">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:Vaga}">
+                                        <Border Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Margin="0,0,10,10" Padding="18,14">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0">
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                        <Border Background="{Binding NivelBadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
+                                                            <TextBlock Text="{Binding Nivel}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Id, StringFormat='#{0}'}" FontSize="11" Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                    <TextBlock Text="{Binding Titulo}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,6"/>
+
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="🏢 " FontSize="12"/>
+                                                        <TextBlock Text="{Binding Empresa}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextHighlight}" Margin="0,0,16,0"/>
+                                                        <TextBlock Text="📍 " FontSize="12"/>
+                                                        <TextBlock Text="{Binding LocalFormatado}" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnAbrirLink_Click" Margin="0,0,8,0">
+                                                        <TextBlock Text="🌐 Abrir Vaga"/>
+                                                    </Button>
+                                                    <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnRemoverFavorita_Click" Background="#e11d48" Foreground="White">
+                                                        <TextBlock Text="🗑️ Remover"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
@@ -654,157 +750,314 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-
-                            <!-- Botão Carregar Mais Vagas (Final da Lista) -->
-                            <Border x:Name="PanelCarregarMais" Visibility="Collapsed" Margin="0,10,10,26" HorizontalAlignment="Center">
-                                <Button x:Name="BtnCarregarMaisFim" Style="{StaticResource PrimaryButton}" Height="42" Padding="28,0" Click="BtnCarregarMais_Click">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="📥 " FontSize="14" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Carregar Mais Vagas (+ Próximas Páginas)" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </Button>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Grid>
-            </TabItem>
-
-            <!-- ABA 2: VAGAS FAVORITAS / SALVAS -->
-            <TabItem Header="⭐ Vagas Salvas">
-                <Grid Margin="0,6,0,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0" Margin="2,0,2,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Oportunidades salvas no banco de dados local SQLite para acompanhamento:" FontSize="13" Foreground="#94a3b8" VerticalAlignment="Center"/>
-                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="🔄 Atualizar Salvas" Click="BtnRecarregarFavoritas_Click"/>
+                        </ScrollViewer>
                     </Grid>
+                </TabItem>
 
-                    <!-- Empty State amigável quando não há favoritos salvos -->
-                    <Border x:Name="EmptyStateFavoritas" Grid.Row="1" Background="#131522" BorderBrush="#202438" BorderThickness="1" CornerRadius="12" Padding="40,35" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="620">
-                        <StackPanel HorizontalAlignment="Center">
-                            <Border Background="#241e36" Width="60" Height="60" CornerRadius="30" HorizontalAlignment="Center" Margin="0,0,0,14">
-                                <TextBlock Text="⭐" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Nenhuma vaga favoritada ainda" FontSize="17" FontWeight="Bold" Foreground="#f8fafc" Margin="0,0,0,6" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Pesquise oportunidades na primeira aba e clique no botão '⭐ Salvar Vaga' para acompanhar suas vagas preferidas aqui." FontSize="13" Foreground="#94a3b8" TextWrapping="Wrap" LineHeight="19" TextAlignment="Center" Margin="0,0,0,4"/>
-                        </StackPanel>
-                    </Border>
+                <!-- ========================================== -->
+                <!-- ABA 3: ESTATÍSTICAS (CIDADES E EMPRESAS)   -->
+                <!-- ========================================== -->
+                <TabItem Header="📊 Estatísticas">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,4,0,0">
+                        <StackPanel Margin="0,0,10,16">
+                            <!-- Cabeçalho de Estatísticas -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Painel de Estatísticas de Mercado (Banco SQLite)" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Text="Distribuição das vagas catalogadas por nível de experiência, cidades com mais oportunidades e empresas contratantes." FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Style="{StaticResource SecondaryButton}" Content="🔄 Atualizar Dados" Click="BtnAtualizarEstatisticas_Click" Margin="0,0,8,0"/>
+                                    <Button Style="{StaticResource SecondaryButton}" Content="🧹 Limpar Histórico Não-Salvo" Click="BtnLimparHistorico_Click"/>
+                                </StackPanel>
+                            </Grid>
 
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="ItemsFavoritas">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type models:Vaga}">
-                                    <Border Background="#161828" BorderBrush="#25293d" BorderThickness="1" CornerRadius="10" Margin="0,0,10,12" Padding="18,16">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+                            <!-- 1. Cards por Nível de Experiência -->
+                            <UniformGrid Columns="5" Margin="0,0,0,18">
+                                <Border Background="{DynamicResource BgCard}" BorderBrush="#8b5cf6" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="0,0,8,0">
+                                    <StackPanel>
+                                        <TextBlock Text="🎓 Estágio / Trainee" FontSize="12" FontWeight="SemiBold" Foreground="#8b5cf6"/>
+                                        <TextBlock x:Name="TxtQtdEstagio" Text="0" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,4,0,0"/>
+                                        <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                    </StackPanel>
+                                </Border>
 
-                                            <StackPanel Grid.Column="0">
-                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                    <Border Background="{Binding NivelBadgeCor}" CornerRadius="4" Padding="7,3" Margin="0,0,8,0">
-                                                        <TextBlock Text="{Binding Nivel}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                <Border Background="{DynamicResource BgCard}" BorderBrush="#3b82f6" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="4,0">
+                                    <StackPanel>
+                                        <TextBlock Text="🚀 Júnior" FontSize="12" FontWeight="SemiBold" Foreground="#3b82f6"/>
+                                        <TextBlock x:Name="TxtQtdJunior" Text="0" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,4,0,0"/>
+                                        <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BgCard}" BorderBrush="#06b6d4" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="4,0">
+                                    <StackPanel>
+                                        <TextBlock Text="⚡ Pleno" FontSize="12" FontWeight="SemiBold" Foreground="#06b6d4"/>
+                                        <TextBlock x:Name="TxtQtdPleno" Text="0" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,4,0,0"/>
+                                        <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BgCard}" BorderBrush="#f59e0b" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="4,0">
+                                    <StackPanel>
+                                        <TextBlock Text="🏆 Sênior / Lead" FontSize="12" FontWeight="SemiBold" Foreground="#f59e0b"/>
+                                        <TextBlock x:Name="TxtQtdSenior" Text="0" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,4,0,0"/>
+                                        <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BgCard}" BorderBrush="#64748b" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="8,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="💼 Geral / Outros" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock x:Name="TxtQtdGeral" Text="0" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,4,0,0"/>
+                                        <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
+
+                            <!-- 2. Rankings Lado a Lado: Cidades e Empresas -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Coluna Esquerda: Top Cidades -->
+                                <Border Grid.Column="0" Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,0,8,0">
+                                    <StackPanel>
+                                        <TextBlock Text="📍 Vagas por Cidade / Localidade" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Cidades com maior volume de vagas e principais empresas locais" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,14"/>
+
+                                        <TextBlock x:Name="TxtEmptyCidades" Text="Realize uma busca de vagas para visualizar as estatísticas por cidade." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,10" Visibility="Collapsed"/>
+
+                                        <ItemsControl x:Name="ItemsRankingCidades">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type models:EstatisticaRankingItem}">
+                                                    <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,8">
+                                                        <StackPanel>
+                                                            <Grid Margin="0,0,0,4">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding Titulo}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding ResumoQuantidade}" FontSize="12" FontWeight="SemiBold" Foreground="#3b82f6"/>
+                                                            </Grid>
+                                                            <ProgressBar Value="{Binding Percentual}" Maximum="100" Height="6" Background="{DynamicResource BgInput}" Foreground="#3b82f6" BorderThickness="0" Margin="0,2,0,5"/>
+                                                            <TextBlock Text="{Binding Subtitulo}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                                                        </StackPanel>
                                                     </Border>
-                                                    <TextBlock Text="{Binding Id, StringFormat='#{0}'}" FontSize="11" Foreground="#64748b" VerticalAlignment="Center"/>
-                                                </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
 
-                                                <TextBlock Text="{Binding Titulo}" FontSize="15" FontWeight="Bold" Foreground="#f8fafc" Margin="0,0,0,6"/>
+                                <!-- Coluna Direita: Top Empresas -->
+                                <Border Grid.Column="1" Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="8,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="🏢 Empresas com Mais Vagas Abertas" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Principais empresas contratando e as cidades onde atuam" FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,14"/>
 
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="🏢 " FontSize="12"/>
-                                                    <TextBlock Text="{Binding Empresa}" FontSize="12" FontWeight="SemiBold" Foreground="#93c5fd" Margin="0,0,14,0"/>
-                                                    <TextBlock Text="📍 " FontSize="12"/>
-                                                    <TextBlock Text="{Binding LocalFormatado}" FontSize="12" Foreground="#cbd5e1"/>
-                                                </StackPanel>
-                                            </StackPanel>
+                                        <TextBlock x:Name="TxtEmptyEmpresas" Text="Realize uma busca de vagas para visualizar as empresas contratantes." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,10" Visibility="Collapsed"/>
 
-                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnAbrirLink_Click" Margin="0,0,8,0" Padding="14,8">
-                                                    <TextBlock Text="🌐 Abrir Vaga"/>
-                                                </Button>
-                                                <Button Style="{StaticResource CardActionButton}" Tag="{Binding}" Click="BtnRemoverFavorita_Click" Padding="12,8" Background="#881337">
-                                                    <TextBlock Text="🗑️ Remover"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                        <ItemsControl x:Name="ItemsRankingEmpresas">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type models:EstatisticaRankingItem}">
+                                                    <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,0,8">
+                                                        <StackPanel>
+                                                            <Grid Margin="0,0,0,4">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding Titulo}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding ResumoQuantidade}" FontSize="12" FontWeight="SemiBold" Foreground="#10b981"/>
+                                                            </Grid>
+                                                            <ProgressBar Value="{Binding Percentual}" Maximum="100" Height="6" Background="{DynamicResource BgInput}" Foreground="#10b981" BorderThickness="0" Margin="0,2,0,5"/>
+                                                            <TextBlock Text="{Binding Subtitulo}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
                     </ScrollViewer>
+                </TabItem>
+
+                <!-- ========================================== -->
+                <!-- ABA 4: CADASTRO DE PREFERÊNCIAS DE PERFIL  -->
+                <!-- ========================================== -->
+                <TabItem Header="⚙️ Minhas Preferências">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,4,0,0">
+                        <Border Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="12" Padding="30,24" MaxWidth="680" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,20">
+                            <StackPanel>
+                                <TextBlock Text="⚙️ Cadastro de Preferências do Usuário" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                <TextBlock Text="Defina seu nível de experiência e sua área de interesse. O WorkIT usará essas preferências para preencher os filtros automaticamente e priorizar vagas compatíveis com o seu perfil." FontSize="13" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" Margin="0,0,0,20"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Seu Nome -->
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,14">
+                                        <TextBlock Text="Seu Nome (opcional):" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="TxtPrefNome"/>
+                                    </StackPanel>
+
+                                    <!-- Nível de Experiência -->
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,14">
+                                        <TextBlock Text="Seu Nível de Experiência:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6"/>
+                                        <ComboBox x:Name="CmbPrefNivel"/>
+                                    </StackPanel>
+
+                                    <!-- Área Favorita -->
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,14">
+                                        <TextBlock Text="Área de TI Principal:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6"/>
+                                        <ComboBox x:Name="CmbPrefArea" DisplayMemberPath="Nome"/>
+                                    </StackPanel>
+
+                                    <!-- Estado Preferido -->
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,14">
+                                        <TextBlock Text="Estado Preferido (UF):" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6"/>
+                                        <ComboBox x:Name="CmbPrefEstado" DisplayMemberPath="Display"/>
+                                    </StackPanel>
+
+                                    <!-- Cidade Preferida -->
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,16">
+                                        <TextBlock Text="Cidade Preferida (opcional):" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="TxtPrefCidade"/>
+                                    </StackPanel>
+
+                                    <!-- Opções Extras -->
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,18,0,16" VerticalAlignment="Center">
+                                        <CheckBox x:Name="ChkPrefRemoto" Content="Priorizar apenas vagas remotas (Home Office)" Foreground="{DynamicResource TextPrimary}" FontSize="12" Margin="0,0,0,8" Cursor="Hand"/>
+                                        <CheckBox x:Name="ChkPrefTemaClaro" Content="Utilizar Tema Claro (Branco) como padrão" Foreground="{DynamicResource TextPrimary}" FontSize="12" Cursor="Hand"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Button Style="{StaticResource PrimaryButton}" Padding="22,0" Click="BtnSalvarPreferencias_Click" Margin="0,0,10,0">
+                                        <TextBlock Text="💾 Salvar e Aplicar ao Filtro"/>
+                                    </Button>
+                                    <Button Style="{StaticResource SecondaryButton}" Content="🔄 Restaurar Padrões" Click="BtnRestaurarPreferencias_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+
+            <!-- 4. BARRA DE STATUS INFERIOR -->
+            <Border Grid.Row="3" Background="{DynamicResource BgHeader}" BorderBrush="{DynamicResource BorderPrimary}" BorderThickness="0,1,0,0" Padding="22,9">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock x:Name="TxtStatusRodape" Text="Pronto para realizar buscas de vagas." FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                    <TextBlock Grid.Column="1" Text="Desenvolvimento de Software Visual — WorkIT" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                 </Grid>
-            </TabItem>
+            </Border>
+        </Grid>
 
-            <!-- ABA 3: ESTATÍSTICAS DO MERCADO -->
-            <TabItem Header="📊 Estatísticas">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,6,0,0">
-                    <StackPanel Margin="0,0,10,0">
-                        <!-- Grid de Cards de Métricas -->
-                        <TextBlock Text="Métricas do Banco Local de Vagas (SQLite)" FontSize="16" FontWeight="Bold" Foreground="#f8fafc" Margin="0,0,0,14"/>
+        <!-- ======================================================== -->
+        <!-- TELA INICIAL DE APRESENTAÇÃO ("O QUE FAZEMOS")           -->
+        <!-- ======================================================== -->
+        <Border x:Name="TelaInicialOverlay" Background="{DynamicResource BgWindow}" Visibility="Visible" Padding="40,28">
+            <Grid MaxWidth="920" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Border Background="{DynamicResource BgCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="16" Padding="42,36">
+                    <StackPanel>
+                        <!-- Topo da Tela Inicial: Logo + Botão Tema -->
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                        <UniformGrid Columns="4" Margin="0,0,0,24">
-                            <!-- Card Estágio -->
-                            <Border Background="#161828" BorderBrush="#8b5cf6" BorderThickness="1" CornerRadius="10" Padding="18" Margin="4">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border CornerRadius="12" Width="54" Height="54" Margin="0,0,16,0" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1">
+                                    <Border.Background>
+                                        <ImageBrush ImageSource="Assets/logo.png" Stretch="UniformToFill"/>
+                                    </Border.Background>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="WorkIT" FontSize="28" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Text="Centralizador e Rastreador Inteligente de Vagas de TI" FontSize="13" FontWeight="SemiBold" Foreground="#3b82f6"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Click="BtnAlternarTema_Click" VerticalAlignment="Top">
+                                <TextBlock Text="🌗 Alternar Tema (Claro / Escuro)" FontSize="12"/>
+                            </Button>
+                        </Grid>
+
+                        <!-- O que fazemos -->
+                        <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Padding="20,16" Margin="0,0,0,22">
+                            <StackPanel>
+                                <TextBlock Text="💡 O que nós fazemos?" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,6"/>
+                                <TextBlock Text="O WorkIT foi desenvolvido para ajudar estudantes e profissionais de Tecnologia da Informação a encontrarem oportunidades reais de trabalho sem perder tempo em dezenas de páginas. O sistema consulta vagas em tempo real na Gupy, classifica automaticamente o nível de experiência exigido (Estágio, Júnior, Pleno ou Sênior), salva seu histórico em banco de dados SQLite e gera estatísticas sobre as cidades e empresas que mais contratam."
+                                           FontSize="13.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap" LineHeight="21"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 4 Pilares do Sistema -->
+                        <UniformGrid Columns="2" Margin="0,0,0,26">
+                            <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="0,0,8,8">
                                 <StackPanel>
-                                    <TextBlock Text="Estágio" FontSize="13" Foreground="#c084fc"/>
-                                    <TextBlock x:Name="TxtQtdEstagio" Text="0" FontSize="28" FontWeight="Bold" Foreground="#f8fafc" Margin="0,4,0,0"/>
-                                    <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="#94a3b8"/>
+                                    <TextBlock Text="🔍 1. Busca em Tempo Real por Área" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Pesquise vagas por área de TI (Backend, Frontend, Dados, QA, RPA, IA), estado, cidade ou modalidade remota." FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
 
-                            <!-- Card Júnior -->
-                            <Border Background="#161828" BorderBrush="#3b82f6" BorderThickness="1" CornerRadius="10" Padding="18" Margin="4">
+                            <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="8,0,0,8">
                                 <StackPanel>
-                                    <TextBlock Text="Júnior" FontSize="13" Foreground="#60a5fa"/>
-                                    <TextBlock x:Name="TxtQtdJunior" Text="0" FontSize="28" FontWeight="Bold" Foreground="#f8fafc" Margin="0,4,0,0"/>
-                                    <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="#94a3b8"/>
+                                    <TextBlock Text="🎯 2. Preferências por Nível de Experiência" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Cadastre seu perfil (Estágio, Júnior, Pleno ou Sênior) para filtrar automaticamente as vagas ideais para o seu momento." FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
 
-                            <!-- Card Pleno -->
-                            <Border Background="#161828" BorderBrush="#06b6d4" BorderThickness="1" CornerRadius="10" Padding="18" Margin="4">
+                            <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="0,8,8,0">
                                 <StackPanel>
-                                    <TextBlock Text="Pleno" FontSize="13" Foreground="#22d3ee"/>
-                                    <TextBlock x:Name="TxtQtdPleno" Text="0" FontSize="28" FontWeight="Bold" Foreground="#f8fafc" Margin="0,4,0,0"/>
-                                    <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="#94a3b8"/>
+                                    <TextBlock Text="📊 3. Estatísticas de Cidades e Empresas" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Visualize rankings claros mostrando em quais cidades estão as vagas e quais empresas mais estão contratando." FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
 
-                            <!-- Card Sênior -->
-                            <Border Background="#161828" BorderBrush="#f59e0b" BorderThickness="1" CornerRadius="10" Padding="18" Margin="4">
+                            <Border Background="{DynamicResource BgSubCard}" BorderBrush="{DynamicResource BorderCard}" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="8,8,0,0">
                                 <StackPanel>
-                                    <TextBlock Text="Sênior" FontSize="13" Foreground="#fbbf24"/>
-                                    <TextBlock x:Name="TxtQtdSenior" Text="0" FontSize="28" FontWeight="Bold" Foreground="#f8fafc" Margin="0,4,0,0"/>
-                                    <TextBlock Text="vagas catalogadas" FontSize="11" Foreground="#94a3b8"/>
+                                    <TextBlock Text="💾 4. Banco Local SQLite &amp; Exportação CSV" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Destaca vagas inéditas ('NOVA'), guarda suas vagas favoritas e permite exportar os resultados para o Excel." FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
                         </UniformGrid>
+
+                        <!-- Botões de Entrada -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Style="{StaticResource PrimaryButton}" Height="44" Padding="28,0" Margin="0,0,12,0" Click="BtnComecarExplorar_Click">
+                                <TextBlock Text="🚀 Ir para o Painel de Vagas →" FontSize="14" FontWeight="Bold"/>
+                            </Button>
+                            <Button Style="{StaticResource SecondaryButton}" Height="44" Padding="22,0" Click="BtnComecarPreferencias_Click">
+                                <TextBlock Text="⚙️ Configurar Minhas Preferências" FontSize="13"/>
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-        </TabControl>
-
-        <!-- 4. BARRA DE STATUS INFERIOR -->
-        <Border Grid.Row="3" Background="#10111d" BorderBrush="#1f2235" BorderThickness="0,1,0,0" Padding="20,10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock x:Name="TxtStatusRodape" Text="Pronto para realizar buscas de vagas." FontSize="12" Foreground="#94a3b8"/>
-                </StackPanel>
-
-                <TextBlock Grid.Column="1" Text="Desenvolvimento de Software Visual — WorkIT" FontSize="11" Foreground="#64748b"/>
+                </Border>
             </Grid>
         </Border>
     </Grid>
